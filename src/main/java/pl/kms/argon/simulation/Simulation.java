@@ -12,25 +12,24 @@ import static pl.kms.argon.constants.Constants.*;
 
 public class Simulation {
 
-    private List<Atom> atoms = new ArrayList<>(N);
+    private List<Atom> atoms = new ArrayList<>((int) N.getValue());
     private Generator generator = new Generator();
     private Atom P = new Atom(); // (8)
 
-    // TODO: 2.2 Potencjały i siły, algorytm 2
-    //  Wczytanie z pliku początkowych parametrów
     public void run() {
         initialize();
+        saveMomentumToFile("test.dat");
     }
 
     private void initialize() {
-        for (int i0 = 0; i0 < n; i0++) {
-            for (int i1 = 0; i1 < n; i1++) {
-                for (int i2 = 0; i2 < n; i2++) {
+        for (int i0 = 0; i0 < n.getValue(); i0++) {
+            for (int i1 = 0; i1 < n.getValue(); i1++) {
+                for (int i2 = 0; i2 < n.getValue(); i2++) {
 
-                    int i = i0 + i1 * n + i2 * n * n;
-                    Atom b00 = b0.mult(i0 - (n - 1) / 2.0);
-                    Atom b11 = b1.mult(i1 - (n - 1) / 2.0);
-                    Atom b22 = b2.mult(i2 - (n - 1) / 2.0);
+                    int i = (int) (i0 + i1 * n.getValue() + i2 * n.getValue() * n.getValue());
+                    Atom b00 = b0.mult(i0 - (n.getValue() - 1) / 2.0);
+                    Atom b11 = b1.mult(i1 - (n.getValue() - 1) / 2.0);
+                    Atom b22 = b2.mult(i2 - (n.getValue() - 1) / 2.0);
 
                     Atom r0 = sumAtomsPosition(b00, b11, b22);
 
@@ -49,22 +48,26 @@ public class Simulation {
 
     private void adjustInitialMomentum() {
         // (8)
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < N.getValue(); i++) {
             Atom pPrim = atoms.get(i);
-            pPrim.setMomentum(pPrim.px - P.px / N, pPrim.py - P.py / N, pPrim.pz - P.pz / N);
+            pPrim.setMomentum(
+                    pPrim.px - P.px / N.getValue(),
+                    pPrim.py - P.py / N.getValue(),
+                    pPrim.pz - P.pz / N.getValue()
+            );
             atoms.set(i, pPrim);
         }
     }
 
     private double getInitialMomentum(double E_k) {
-        double p = Math.sqrt(2 * m * E_k);
+        double p = Math.sqrt(2 * m.getValue() * E_k);
         if (generator.nextBoolean())
             p *= -1;
         return p;
     }
 
     private double getKineticEnergy() {
-        return -0.5 * k_b * T0 * Math.log(generator.uniform(0, 1));
+        return -0.5 * k_b.getValue() * T0.getValue() * Math.log(generator.uniform(0, 1));
     }
 
     private Atom sumAtomsPosition(Atom... atoms) {
