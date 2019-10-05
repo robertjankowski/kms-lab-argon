@@ -15,7 +15,7 @@ public class Loader {
             List<Parameter> inputParameters = Files
                     .lines(Path.of(filename))
                     .map(parameter -> parameter.split("#"))
-                    .map(parameter -> new Parameter(parameter[1].strip(), Double.valueOf(parameter[0])))
+                    .map(parameter -> new Parameter(parameter[1].strip(), Double.parseDouble(parameter[0])))
                     .collect(Collectors.toList());
             List<String> names = inputParameters
                     .stream()

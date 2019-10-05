@@ -2,21 +2,64 @@ package pl.kms.argon.constants;
 
 import pl.kms.argon.atom.Atom;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Constants {
-    // liczba atomów wzdłuż każdej z krawędzi
+    /**
+     * Number of atoms along one of the edges
+     */
     public static Parameter n = new Parameter("n", 10);
-    public static Parameter T0 = new Parameter("T0", 100); // Kelvin
-    public static Parameter a = new Parameter("a", 0.38); // nm
+
+    /**
+     * Initial temperature [K]
+     */
+    public static Parameter T0 = new Parameter("T0", 100);
+
+    /**
+     * Length of elementary cell [nm]
+     */
+    public static Parameter a = new Parameter("a", 0.38);
+
+    /**
+     * Atom mass
+     */
     public static Parameter m = new Parameter("m", 39.948); // masa atomu
 
-    // liczba atomów
+
+    /**
+     * Sum of all atoms
+     */
     public static Parameter N = new Parameter("N", Math.pow(n.getValue(), 3));
+
+    /**
+     * Boltzmann constant
+     */
     public static Parameter k_b = new Parameter("k_b", 0.00831);
 
-    public static List<Parameter> parameters = new ArrayList<>(List.of(n, N, k_b, T0, a, m));
+
+    /**
+     * Radius of spherical vessel [nm]
+     */
+    public static Parameter L = new Parameter("L", 1.2);
+
+
+    /**
+     * Interatomic distance
+     */
+    public static Parameter R = new Parameter("R", 0.38);
+
+    /**
+     * flexibility factor
+     */
+    public static Parameter f = new Parameter("f", 1e4);
+
+    /**
+     * Epsilon, potencial
+     */
+    public static Parameter e = new Parameter("e", 1);
+
+    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R);
 
     public static void reinitializeConstants() {
         for (Parameter parameter : parameters) {
@@ -40,7 +83,11 @@ public class Constants {
         b2.setPosition(a.getValue() / 2.0, a.getValue() * Math.sqrt(3) / 6, a.getValue() * Math.sqrt(2.0 / 3.0));
     }
 
-    public static Atom b0 = new Atom(a.getValue(), 0, 0);
-    public static Atom b1 = new Atom(a.getValue() / 2.0, a.getValue() * Math.sqrt(3) / 2, 0);
-    public static Atom b2 = new Atom(a.getValue() / 2.0, a.getValue() * Math.sqrt(3) / 6, a.getValue() * Math.sqrt(2.0 / 3.0));
+    public static Atom b0 = new Atom();
+    public static Atom b1 = new Atom();
+    public static Atom b2 = new Atom();
+
+    static {
+        initializeBsVectors();
+    }
 }
