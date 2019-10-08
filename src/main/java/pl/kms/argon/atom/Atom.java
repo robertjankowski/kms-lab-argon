@@ -40,6 +40,10 @@ public class Atom {
         return Math.sqrt(Fx * Fx + Fy * Fy + Fz * Fz);
     }
 
+    public double absMomentum() {
+        return Math.sqrt(px * px + py * py + pz * pz);
+    }
+
     public double absPositionSubstraction(Atom atom) {
         double x = this.x - atom.x;
         double y = this.y - atom.y;

@@ -54,7 +54,7 @@ public class Simulation {
         }
         adjustInitialMomentum();
 
-        // Potencial and forces
+        // Potential and forces
         for (int i = 0; i < N.getValue(); i++) {
             Atom atom = atoms.get(i);
             Atom newAtom = new Atom(atom);
@@ -75,7 +75,7 @@ public class Simulation {
                 double rij = newAtom.absPositionSubstraction(atomJ);
                 // (9)
                 if (rij < 1e-5)
-                    break; // Produce NaN, e.g. maybe introduce epsilon=1e-6
+                    rij = 1e-5; // Produce NaN, e.g. maybe introduce epsilon=1e-6
                 double R12 = Math.pow(R.getValue() / rij, 12);
                 double R6 = Math.pow(R.getValue() / rij, 6);
                 double vp = e.getValue() * (R12 - 2 * R6);
@@ -94,7 +94,14 @@ public class Simulation {
         }
         V.setValue(VS.getValue() + VP.getValue());
         pressure.setValue(pressure.getValue() / (4 * Math.PI * L.getValue() * L.getValue()));
-        System.out.println("V = " + V + ", p = " + pressure);
+        System.out.println("V = " + V + ", p = " + pressure + ", T = " + calculateTemperature());
+    }
+
+    private double calculateTemperature() {
+        double energy = atoms.stream()
+                .mapToDouble(atom -> atom.absMomentum() / (2 * m.getValue()))
+                .sum();
+        return 2 / (3 * N.getValue() * k_b.getValue()) * energy;
     }
 
     private void adjustInitialMomentum() {

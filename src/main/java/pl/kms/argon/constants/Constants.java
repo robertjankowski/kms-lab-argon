@@ -55,11 +55,11 @@ public class Constants {
     public static Parameter f = new Parameter("f", 1e4);
 
     /**
-     * Epsilon, potencial
+     * Epsilon, potential
      */
     public static Parameter e = new Parameter("e", 1);
 
-    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R);
+    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e);
 
     public static void reinitializeConstants() {
         for (Parameter parameter : parameters) {
@@ -73,6 +73,14 @@ public class Constants {
                 a.setValue(parameterValue);
             else if (parameterName.equals(m.getName()))
                 m.setValue(parameterValue);
+            else if (parameterName.equals(L.getName()))
+                L.setValue(parameterValue);
+            else if (parameterName.equals(R.getName()))
+                R.setValue(parameterValue);
+            else if (parameterName.equals(f.getName()))
+                f.setValue(parameterValue);
+            else if (parameterName.equals(e.getName()))
+                e.setValue(parameterValue);
         }
     }
 
