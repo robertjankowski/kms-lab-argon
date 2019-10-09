@@ -5,6 +5,7 @@ import pl.kms.argon.constants.Parameter;
 import pl.kms.argon.generator.Generator;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,17 +22,17 @@ public class Simulation {
 
     public void run() {
         initialize();
-        simulation();
+        simulation(false);
     }
 
     private void initialize() {
-        double nVal = n.getValue();
+        int nVal = (int) n.getValue();
         double nDividedBy2 = (nVal - 1) / 2.0;
         for (int i0 = 0; i0 < nVal; i0++) {
             for (int i1 = 0; i1 < nVal; i1++) {
                 for (int i2 = 0; i2 < nVal; i2++) {
 
-                    int i = (int) (i0 + i1 * nVal + i2 * nVal * nVal);
+                    int i = i0 + i1 * nVal + i2 * nVal * nVal;
                     b0.multPos(i0 - nDividedBy2);
                     b1.multPos(i1 - nDividedBy2);
                     b2.multPos(i2 - nDividedBy2);
@@ -55,14 +56,15 @@ public class Simulation {
     }
 
 
-    private void simulation() {
+    private void simulation(boolean isSaveToFile) {
         int S = (int) (Sd.getValue() + So.getValue());
         double Tmean = 0;
         double Pmean = 0;
         double Hmean = 0;
+        double t = 0.0;
         for (int s = 0; s < S; s++) {
             // Iterate over every atoms
-            for (int i = 0; i < (int) N.getValue(); i++) {
+            for (int i = 0; i < N.getValue(); i++) {
                 Atom atomI = atoms.get(i);
 
                 // (18a)
@@ -78,7 +80,7 @@ public class Simulation {
                 atoms.set(i, atomI);
             }
             double v = calculateForcesAndPotentials();
-            for (int i = 0; i < (int) N.getValue(); i++) {
+            for (int i = 0; i < N.getValue(); i++) {
                 Atom atomI = atoms.get(i);
                 // (18c)
                 atomI.px += 0.5 * atomI.Fx * tau.getValue();
@@ -91,7 +93,7 @@ public class Simulation {
             V.setValue(v);
             double T = calculateTemperature();
             double H = calculateHamiltonian();
-            System.out.println("T: " + T + ", H: " + H + ", V: " + V.getValue());
+            //System.out.println("T: " + T + ", H: " + H + ", V: " + V.getValue());
 
             // Accumulate mean values
             if (s >= So.getValue()) {
@@ -99,6 +101,14 @@ public class Simulation {
                 Pmean += pressure.getValue();
                 Hmean += H;
             }
+
+            if (isSaveToFile) {
+                if (s % Sout.getValue() == 0)
+                    saveTemporaryValues("out.csv", t, H, V.getValue(), T, pressure.getValue());
+                if (s % Sxyz.getValue() == 0)
+                    savePositionsWithEnergy("pos.csv");
+            }
+            t += tau.getValue();
         }
         Tmean /= Sd.getValue();
         Pmean /= Sd.getValue();
@@ -108,15 +118,34 @@ public class Simulation {
         System.out.println("H_mean: = " + Hmean);
     }
 
+    private void saveTemporaryValues(String filename, double t, double H, double V, double T, double P) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
+            out.println(t + "," + H + "," + V + "," + T + "," + P);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void savePositionsWithEnergy(String filename) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
+            atoms.forEach(atom -> {
+                double energy = Math.pow(atom.absMomentum(), 2) / (2 * m.getValue());
+                out.println(atom.x + "," + atom.y + "," + atom.z + "," + energy);
+            });
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     private double calculateForcesAndPotentials() {
         double V = 0;
-        pressure.setValue(0);
+        pressure.setValue(0.0);
         atoms.forEach(atom -> {
             atom.Fx = 0;
             atom.Fy = 0;
             atom.Fz = 0;
         });
-        for (int i = 0; i < (int) N.getValue(); i++) {
+        for (int i = 0; i < N.getValue(); i++) {
             Atom atomI = atoms.get(i);
             double ri = atomI.absPosition();
             if (ri >= L.getValue()) {
@@ -136,6 +165,7 @@ public class Simulation {
                 // (15)
                 double p = Math.sqrt(FxS * FxS + FyS * FyS + FzS * FzS);
                 pressure.setValue(pressure.getValue() + p);
+                System.out.println(pressure);
             }
 
             for (int j = 0; j < i; j++) {
