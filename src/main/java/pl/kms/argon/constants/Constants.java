@@ -3,7 +3,10 @@ package pl.kms.argon.constants;
 import pl.kms.argon.atom.Atom;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 
 public class Constants {
     /**
@@ -30,7 +33,7 @@ public class Constants {
     /**
      * Sum of all atoms
      */
-    public static Parameter N = new Parameter("N", Math.pow(n.getValue(), 3));
+    public static Parameter N = new Parameter("N", (int) Math.pow(n.getValue(), 3));
 
     /**
      * Boltzmann constant
@@ -42,7 +45,6 @@ public class Constants {
      * Radius of spherical vessel [nm]
      */
     public static Parameter L = new Parameter("L", 2.3);
-
 
     /**
      * Interatomic distance
@@ -74,7 +76,17 @@ public class Constants {
      */
     public static Parameter tau = new Parameter("tau", 1e-3);
 
-    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e, So, Sd);
+    /**
+     * Step to save t,H,V,T,P
+     */
+    public static Parameter Sout = new Parameter("S_out", 10);
+
+    /**
+     * Step to save x_i, y_i, z_u, E_i kinetic
+     */
+    public static Parameter Sxyz = new Parameter("S_xyz", 10);
+
+    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e, So, Sd, Sout, Sxyz);
 
     public static void reinitializeConstants() {
         for (Parameter parameter : parameters) {
@@ -101,6 +113,10 @@ public class Constants {
                 So.setValue(parameterValue);
             else if (parameterName.equals(Sd.getName()))
                 Sd.setValue(parameterValue);
+            else if (parameterName.equals(Sout.getName()))
+                Sout.setValue(parameterValue);
+            else if (parameterName.equals(Sxyz.getName()))
+                Sxyz.setValue(parameterValue);
         }
     }
 
