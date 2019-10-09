@@ -3,10 +3,7 @@ package pl.kms.argon.constants;
 import pl.kms.argon.atom.Atom;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 
 public class Constants {
     /**
