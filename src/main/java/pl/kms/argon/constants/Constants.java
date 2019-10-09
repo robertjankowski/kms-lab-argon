@@ -9,7 +9,7 @@ public class Constants {
     /**
      * Number of atoms along one of the edges
      */
-    public static Parameter n = new Parameter("n", 10);
+    public static Parameter n = new Parameter("n", 5);
 
     /**
      * Initial temperature [K]
@@ -24,7 +24,7 @@ public class Constants {
     /**
      * Atom mass
      */
-    public static Parameter m = new Parameter("m", 39.948); // masa atomu
+    public static Parameter m = new Parameter("m", 39.948);
 
 
     /**
@@ -41,7 +41,7 @@ public class Constants {
     /**
      * Radius of spherical vessel [nm]
      */
-    public static Parameter L = new Parameter("L", 1.2);
+    public static Parameter L = new Parameter("L", 2.3);
 
 
     /**
@@ -59,15 +59,31 @@ public class Constants {
      */
     public static Parameter e = new Parameter("e", 1);
 
-    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e);
+    /**
+     * Steps before simulation
+     */
+    public static Parameter So = new Parameter("So", 100);
+
+    /**
+     * Simulation steps
+     */
+    public static Parameter Sd = new Parameter("Sd", 1000);
+
+    /**
+     * Step
+     */
+    public static Parameter tau = new Parameter("tau", 1e-3);
+
+    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e, So, Sd);
 
     public static void reinitializeConstants() {
         for (Parameter parameter : parameters) {
             String parameterName = parameter.getName();
             double parameterValue = parameter.getValue();
-            if (parameterName.equals(n.getName()))
+            if (parameterName.equals(n.getName())) {
                 n.setValue(parameterValue);
-            else if (parameterName.equals(T0.getName()))
+                N.setValue(Math.pow(n.getValue(), 3));
+            } else if (parameterName.equals(T0.getName()))
                 T0.setValue(parameterValue);
             else if (parameterName.equals(a.getName()))
                 a.setValue(parameterValue);
@@ -81,6 +97,10 @@ public class Constants {
                 f.setValue(parameterValue);
             else if (parameterName.equals(e.getName()))
                 e.setValue(parameterValue);
+            else if (parameterName.equals(So.getName()))
+                So.setValue(parameterValue);
+            else if (parameterName.equals(Sd.getName()))
+                Sd.setValue(parameterValue);
         }
     }
 
