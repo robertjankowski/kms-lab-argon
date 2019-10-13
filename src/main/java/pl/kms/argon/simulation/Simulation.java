@@ -1,13 +1,14 @@
 package pl.kms.argon.simulation;
 
 import pl.kms.argon.atom.Atom;
-import pl.kms.argon.constants.Parameter;
 import pl.kms.argon.generator.Generator;
+import pl.kms.argon.util.Pair;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static pl.kms.argon.constants.Constants.*;
@@ -16,16 +17,14 @@ public class Simulation {
 
     private List<Atom> atoms = new ArrayList<>((int) N.getValue());
     private Generator generator = new Generator();
-    private Atom P = new Atom(); // (8)
-    private Parameter V = new Parameter("V", 0.0);    // (11)
-    private Parameter pressure = new Parameter("P", 0.0); // (15)
 
     public void run() {
         initialize();
-        simulation(false);
+        simulation(true);
     }
 
     private void initialize() {
+        Atom P = new Atom(); // (8)
         int nVal = (int) n.getValue();
         double nDividedBy2 = (nVal - 1) / 2.0;
         for (int i0 = 0; i0 < nVal; i0++) {
@@ -42,7 +41,6 @@ public class Simulation {
                     double p1 = getInitialMomentum(getKineticEnergy());
                     double p2 = getInitialMomentum(getKineticEnergy());
                     r0.setMomentum(p0, p1, p2);
-                    r0.pos = i;
 
                     P.setMomentum(P.px + p0, P.py + p1, P.pz + p2);
                     atoms.add(r0);
@@ -51,8 +49,8 @@ public class Simulation {
                 }
             }
         }
-        adjustInitialMomentum();
-        V.setValue(calculateForcesAndPotentials());
+        adjustInitialMomentum(P);
+        calculateForcesAndPotentials(atoms);
     }
 
 
@@ -63,48 +61,43 @@ public class Simulation {
         double Hmean = 0;
         double t = 0.0;
         for (int s = 0; s < S; s++) {
-            // Iterate over every atoms
-            for (int i = 0; i < N.getValue(); i++) {
-                Atom atomI = atoms.get(i);
-
+            atoms.forEach(atom -> {
                 // (18a)
-                atomI.px += 0.5 * atomI.Fx * tau.getValue();
-                atomI.py += 0.5 * atomI.Fy * tau.getValue();
-                atomI.pz += 0.5 * atomI.Fz * tau.getValue();
+                atom.px += 0.5 * atom.Fx * tau.getValue();
+                atom.py += 0.5 * atom.Fy * tau.getValue();
+                atom.pz += 0.5 * atom.Fz * tau.getValue();
 
                 // (18b)
                 double rTmp = 1 / m.getValue() * tau.getValue();
-                atomI.x += rTmp * atomI.px;
-                atomI.y += rTmp * atomI.py;
-                atomI.z += rTmp * atomI.pz;
-                atoms.set(i, atomI);
-            }
-            double v = calculateForcesAndPotentials();
-            for (int i = 0; i < N.getValue(); i++) {
-                Atom atomI = atoms.get(i);
-                // (18c)
-                atomI.px += 0.5 * atomI.Fx * tau.getValue();
-                atomI.py += 0.5 * atomI.Fy * tau.getValue();
-                atomI.pz += 0.5 * atomI.Fz * tau.getValue();
-                atoms.set(i, atomI);
-            }
+                atom.x += rTmp * atom.px;
+                atom.y += rTmp * atom.py;
+                atom.z += rTmp * atom.pz;
+            });
+            Pair<Double, Double> p = calculateForcesAndPotentials(atoms);
+            atoms.forEach(atom -> {
+                atom.px += 0.5 * atom.Fx * tau.getValue();
+                atom.py += 0.5 * atom.Fy * tau.getValue();
+                atom.pz += 0.5 * atom.Fz * tau.getValue();
+            });
 
             // Temporary values
-            V.setValue(v);
-            double T = calculateTemperature();
-            double H = calculateHamiltonian();
+            double V = p.t;
+            double P = p.v;
+            double kineticEnergy = caluculateKineticEnergy();
+            double T = calculateTemperature(kineticEnergy);
+            double H = calculateHamiltonian(kineticEnergy, V);
             //System.out.println("T: " + T + ", H: " + H + ", V: " + V.getValue());
 
             // Accumulate mean values
             if (s >= So.getValue()) {
                 Tmean += T;
-                Pmean += pressure.getValue();
+                Pmean += P;
                 Hmean += H;
             }
 
             if (isSaveToFile) {
                 if (s % Sout.getValue() == 0)
-                    saveTemporaryValues("out.csv", t, H, V.getValue(), T, pressure.getValue());
+                    saveTemporaryValues("out.csv", t, H, V, T, P);
                 if (s % Sxyz.getValue() == 0)
                     savePositionsWithEnergy("pos.csv");
             }
@@ -118,28 +111,9 @@ public class Simulation {
         System.out.println("H_mean: = " + Hmean);
     }
 
-    private void saveTemporaryValues(String filename, double t, double H, double V, double T, double P) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
-            out.println(t + "," + H + "," + V + "," + T + "," + P);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void savePositionsWithEnergy(String filename) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
-            atoms.forEach(atom -> {
-                double energy = Math.pow(atom.absMomentum(), 2) / (2 * m.getValue());
-                out.println(atom.x + "," + atom.y + "," + atom.z + "," + energy);
-            });
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private double calculateForcesAndPotentials() {
-        double V = 0;
-        pressure.setValue(0.0);
+    private Pair<Double, Double> calculateForcesAndPotentials(List<Atom> atoms) {
+        double V = 0.0;
+        double P = 0.0;
         atoms.forEach(atom -> {
             atom.Fx = 0;
             atom.Fy = 0;
@@ -163,9 +137,7 @@ public class Simulation {
                 atomI.Fz += FzS;
 
                 // (15)
-                double p = Math.sqrt(FxS * FxS + FyS * FyS + FzS * FzS);
-                pressure.setValue(pressure.getValue() + p);
-                System.out.println(pressure);
+                P += Math.sqrt(FxS * FxS + FyS * FyS + FzS * FzS);
             }
 
             for (int j = 0; j < i; j++) {
@@ -197,35 +169,31 @@ public class Simulation {
             }
             atoms.set(i, atomI);
         }
-        pressure.setValue(pressure.getValue() / (4 * Math.PI * Math.pow(L.getValue(), 2)));
-        return V;
+        P /= 4 * Math.PI * Math.pow(L.getValue(), 2);
+        return new Pair<>(V, P);
     }
 
-    private double calculateTemperature() {
-        double energy = atoms.stream()
+    private double caluculateKineticEnergy() {
+        return atoms.stream()
                 .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2) / (2 * m.getValue()))
                 .sum();
-        return 2 / (3 * N.getValue() * k_b.getValue()) * energy;
     }
 
-    private double calculateHamiltonian() {
-        double energy = atoms.stream()
-                .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2) / (2 * m.getValue()))
-                .sum();
-        return energy + V.getValue();
+    private double calculateTemperature(double kineticEnergy) {
+        return 2 / (3 * N.getValue() * k_b.getValue()) * kineticEnergy;
     }
 
-    private void adjustInitialMomentum() {
+    private double calculateHamiltonian(double kineticEnergy, double V) {
+        return kineticEnergy + V;
+    }
+
+    private void adjustInitialMomentum(Atom P) {
         // (8)
-        for (int i = 0; i < N.getValue(); i++) {
-            Atom pPrim = atoms.get(i);
-            pPrim.setMomentum(
-                    pPrim.px - P.px / N.getValue(),
-                    pPrim.py - P.py / N.getValue(),
-                    pPrim.pz - P.pz / N.getValue()
-            );
-            atoms.set(i, pPrim);
-        }
+        atoms.forEach(atom -> {
+            atom.px -= P.px / N.getValue();
+            atom.py -= P.py / N.getValue();
+            atom.pz -= P.pz / N.getValue();
+        });
     }
 
     private double getInitialMomentum(double E_k) {
@@ -251,36 +219,20 @@ public class Simulation {
         return a;
     }
 
-    private String showPositions() {
-        StringBuilder positions = new StringBuilder();
-        for (Atom atom : atoms) {
-            positions.append(atom.positionsToString());
-        }
-        return positions.toString();
-    }
-
-    public void savePositionsToFile(String filename) {
-        try (PrintWriter out = new PrintWriter(filename)) {
-            for (Atom atom : atoms)
-                out.print(atom.positionsToString());
+    private void saveTemporaryValues(String filename, double t, double H, double V, double T, double P) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
+            out.println(t + "," + H + "," + V + "," + T + "," + P);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public void saveMomentumToFile(String filename) {
-        try (PrintWriter out = new PrintWriter(filename)) {
-            for (Atom atom : atoms)
-                out.print(atom.momentumToString());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void saveForcesToFile(String filename) {
-        try (PrintWriter out = new PrintWriter(filename)) {
-            for (Atom atom : atoms)
-                out.print(atom.forcesToString());
+    private void savePositionsWithEnergy(String filename) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
+            atoms.forEach(atom -> {
+                double energy = Math.pow(atom.absMomentum(), 2) / (2 * m.getValue());
+                out.println(atom.x + "," + atom.y + "," + atom.z + "," + energy);
+            });
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
