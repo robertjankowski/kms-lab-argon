@@ -20,7 +20,7 @@ public class Simulation {
 
     public void run() {
         initialize();
-        simulation(false);
+        simulation(true);
     }
 
     private void initialize() {

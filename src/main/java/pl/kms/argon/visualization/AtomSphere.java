@@ -1,8 +1,6 @@
 package pl.kms.argon.visualization;
 
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.glu.GLUquadric;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -23,12 +21,12 @@ public class AtomSphere {
 
     private double transform(double p) {
         // Scale to [-1, 1]
-        double max = 2;
-        double min = -2;
+        double max = 5;
+        double min = -5;
         return 2 * (p - min) / (max - min) - 1;
     }
 
-    public void draw(GL2 gl2, GLU glu, GLUquadric gluQuadric) {
+    public void draw(GL2 gl2) {
         // Prepare light parameters.
         float SHINE_ALL_DIRECTIONS = 1;
         float[] lightPos = {-50, 0, 0, SHINE_ALL_DIRECTIONS};
@@ -51,7 +49,10 @@ public class AtomSphere {
 
         gl2.glLoadIdentity();
         gl2.glTranslated(x, y, z);
-//        glu.gluSphere(gluQuadric, radius, 36, 72);
+        drawSphere(gl2);
+    }
+
+    private void drawSphere(GL2 gl2) {
         double x, y, z;
         double gradation = 10;
         for (double alpha = 0.0; alpha < Math.PI; alpha += Math.PI / gradation) {
