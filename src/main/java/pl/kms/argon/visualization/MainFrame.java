@@ -3,25 +3,30 @@ package pl.kms.argon.visualization;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
+import java.awt.Font;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import static pl.kms.argon.constants.Constants.N;
 
 public class MainFrame implements GLEventListener, MouseMotionListener {
 
-    private Queue<AtomSphere[]> atomSpheres = loadAtoms("pos.csv");
+    private List<AtomSphere[]> atomSpheres = loadAtoms("pos.csv");
+    private TextRenderer timeRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
+    private double timestep = 0.001; // ps
     private double mouseX; // TODO: add camera rotation
     private double mouseY;
+    private int iteration = 0;
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
@@ -42,11 +47,13 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
         gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
-        if (!atomSpheres.isEmpty()) {
-            for (AtomSphere atom : atomSpheres.remove()) {
+        renderTimestep();
+        if (iteration < atomSpheres.size())
+            for (AtomSphere atom : atomSpheres.get(iteration))
                 atom.draw(gl);
-            }
-        }
+        else
+            resetSimulation();
+        iteration++;
         gl.glFlush();
     }
 
@@ -54,18 +61,36 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
     public void reshape(GLAutoDrawable glAutoDrawable, int x, int y, int width, int height) {
     }
 
-    private Queue<AtomSphere[]> loadAtoms(String filename) {
+    private void resetSimulation() {
+        iteration = 0;
+        timestep = 0.0;
+    }
+
+    private String getRoundedTimestep(double timestep, String format) {
+        DecimalFormat df = new DecimalFormat(format);
+        return df.format(timestep);
+    }
+
+    private void renderTimestep() {
+        timeRenderer.beginRendering(800, 800);
+        timeRenderer.setColor(1.0f, 0.2f, 0.2f, 0.8f);
+        timeRenderer.draw("t = " + getRoundedTimestep(timestep, "0.000") + "ps", 100, 100);
+        timeRenderer.endRendering();
+        timestep += 0.001;
+    }
+
+    private List<AtomSphere[]> loadAtoms(String filename) {
         try (BufferedReader br = Files.newBufferedReader(Paths.get(filename), StandardCharsets.US_ASCII)) {
             String line = br.readLine();
             int counter = 0;
-            Queue<AtomSphere[]> atomSpheres = new LinkedList<>();
+            List<AtomSphere[]> atomSpheres = new ArrayList<>();
             AtomSphere[] atoms = new AtomSphere[(int) N.getValue()];
             while (line != null) {
                 String[] positions = line.split(",");
                 double x = Double.parseDouble(positions[0]);
                 double y = Double.parseDouble(positions[1]);
                 double z = Double.parseDouble(positions[2]);
-                AtomSphere atom = new AtomSphere(x, y, z, 0.02);
+                AtomSphere atom = new AtomSphere(x, y, z, 0.05);
                 atoms[counter] = atom;
                 if (counter++ == (int) N.getValue() - 1) {
                     atomSpheres.add(atoms);
@@ -90,8 +115,5 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
     public void mouseMoved(MouseEvent e) {
         mouseX = e.getX();
         mouseY = e.getY();
-        System.out.println(e.getX());
-        System.out.println(e.getY());
-        System.out.println();
     }
 }
