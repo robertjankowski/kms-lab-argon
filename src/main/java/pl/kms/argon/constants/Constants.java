@@ -83,7 +83,7 @@ public class Constants {
      */
     public static Parameter Sxyz = new Parameter("S_xyz", 10);
 
-    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e, So, Sd, Sout, Sxyz);
+    public static List<Parameter> parameters = Arrays.asList(n, N, k_b, T0, a, m, L, R, f, e, So, Sd, Sout, Sxyz, tau);
 
     public static void reinitializeConstants() {
         for (Parameter parameter : parameters) {
@@ -114,6 +114,8 @@ public class Constants {
                 Sout.setValue(parameterValue);
             else if (parameterName.equals(Sxyz.getName()))
                 Sxyz.setValue(parameterValue);
+            else if (parameterName.equals(tau.getName()))
+                tau.setValue(parameterValue);
         }
     }
 

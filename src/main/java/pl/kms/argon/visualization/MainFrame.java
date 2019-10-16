@@ -5,7 +5,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
@@ -17,15 +17,14 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import static pl.kms.argon.constants.Constants.N;
-
 public class MainFrame implements GLEventListener, MouseMotionListener {
 
-    private List<AtomSphere[]> atomSpheres = loadAtoms("pos.csv");
+    private List<AtomSphere[]> atomSpheres = loadAtoms("5_2_pos.csv");
     private TextRenderer timeRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
-    private double timestep = 0.001; // ps
-    private double mouseX; // TODO: add camera rotation
-    private double mouseY;
+    private final int N = 125;
+    private final double tau = 1e-3;
+    private String tauFormat = "0.000";
+    private double timestep = 0.0; // ps
     private int iteration = 0;
 
     @Override
@@ -74,9 +73,9 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
     private void renderTimestep() {
         timeRenderer.beginRendering(800, 800);
         timeRenderer.setColor(1.0f, 0.2f, 0.2f, 0.8f);
-        timeRenderer.draw("t = " + getRoundedTimestep(timestep, "0.000") + "ps", 100, 100);
+        timeRenderer.draw("t = " + getRoundedTimestep(timestep, tauFormat) + "ps", 100, 100);
         timeRenderer.endRendering();
-        timestep += 0.001;
+        timestep += tau;
     }
 
     private List<AtomSphere[]> loadAtoms(String filename) {
@@ -84,7 +83,7 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
             String line = br.readLine();
             int counter = 0;
             List<AtomSphere[]> atomSpheres = new ArrayList<>();
-            AtomSphere[] atoms = new AtomSphere[(int) N.getValue()];
+            AtomSphere[] atoms = new AtomSphere[N];
             while (line != null) {
                 String[] positions = line.split(",");
                 double x = Double.parseDouble(positions[0]);
@@ -92,10 +91,10 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
                 double z = Double.parseDouble(positions[2]);
                 AtomSphere atom = new AtomSphere(x, y, z, 0.05);
                 atoms[counter] = atom;
-                if (counter++ == (int) N.getValue() - 1) {
+                if (counter++ == N - 1) {
                     atomSpheres.add(atoms);
                     counter = 0;
-                    atoms = new AtomSphere[(int) N.getValue()];
+                    atoms = new AtomSphere[N];
                 }
                 line = br.readLine();
             }
@@ -113,7 +112,6 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        mouseX = e.getX();
-        mouseY = e.getY();
+
     }
 }

@@ -17,9 +17,9 @@ public class Simulation {
     private List<Atom> atoms = new ArrayList<>((int) N.getValue());
     private Generator generator = new Generator();
 
-    public void run() {
+    public void run(String positionsFile, String meanValuesFile) {
         initialize();
-        simulation(true);
+        simulation(positionsFile, meanValuesFile);
     }
 
     private void initialize() {
@@ -53,7 +53,7 @@ public class Simulation {
     }
 
 
-    private void simulation(boolean isSaveToFile) {
+    private void simulation(String positionsFile, String meanValuesFile) {
         int S = (int) (Sd.getValue() + So.getValue());
         double Tmean = 0;
         double Pmean = 0;
@@ -82,10 +82,10 @@ public class Simulation {
             // Temporary values
             double V = p.t;
             double P = p.v;
-            double kineticEnergy = caluculateKineticEnergy();
+            double kineticEnergy = calculateKineticEnergy();
             double T = calculateTemperature(kineticEnergy);
             double H = calculateHamiltonian(kineticEnergy, V);
-            //System.out.println("T: " + T + ", H: " + H + ", V: " + V.getValue());
+            //System.out.println("T: " + T + ", H: " + H + ", V: " + V);
 
             // Accumulate mean values
             if (s >= So.getValue()) {
@@ -94,12 +94,10 @@ public class Simulation {
                 Hmean += H;
             }
 
-            if (isSaveToFile) {
-                if (s % Sout.getValue() == 0)
-                    saveTemporaryValues("out.csv", t, H, V, T, P);
-                if (s % Sxyz.getValue() == 0)
-                    savePositionsWithEnergy("pos.csv");
-            }
+            if (s % Sout.getValue() == 0)
+                saveTemporaryValues(meanValuesFile, t, H, V, T, P);
+            if (s % Sxyz.getValue() == 0)
+                savePositionsWithEnergy(positionsFile);
             t += tau.getValue();
         }
         Tmean /= Sd.getValue();
@@ -172,7 +170,7 @@ public class Simulation {
         return new Pair<>(V, P);
     }
 
-    private double caluculateKineticEnergy() {
+    private double calculateKineticEnergy() {
         return atoms.stream()
                 .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2) / (2 * m.getValue()))
                 .sum();

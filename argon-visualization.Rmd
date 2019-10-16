@@ -1,0 +1,57 @@
+---
+title: "argon-visualization"
+author: "Robert Jankowski"
+date: "16/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# E_mean od tau
+# H od t
+# E_k, V, P od t
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+```{r}
+df <- read.csv("5_1_out.csv", header = F)
+colnames(df) <- c("t", "H", "V", "T", "P") 
+head(df)
+```
+
+### Hamiltonian
+```{r}
+ggplot(df) +
+    geom_point(aes(t, T)) +
+    labs(x = "t [ps]", y = "H []", title = "Hamiltonian") + 
+    theme_light()
+```
+
+### Temperature
+```{r}
+ggplot(df) +
+    geom_point(aes(t, T)) +
+    labs(x = "t [ps]", y = "T [K]", title = "Temperature") + 
+    theme_light()
+```
+
+
+### Potential
+```{r}
+ggplot(df) +
+    geom_point(aes(t, V)) +
+    labs(x = "t [ps]", y = "V []", title = "Potential") + 
+    theme_light()
+```
+
+
+### Pressure
+```{r}
+ggplot(df) +
+    geom_point(aes(t, P)) +
+    labs(x = "t [ps]", y = "P []", title = "Pressure") + 
+    theme_light()
+```
+
