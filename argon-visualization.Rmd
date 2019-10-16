@@ -12,46 +12,58 @@ output: html_document
 
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(gridExtra)
+```
+
+### Testing stability
+```{r}
+stability <- read.csv("output/stability.csv", header = F)
+colnames(stability) <- c("tau", "H", "P", "T")
+head(stability)
+```
+
+```{r, fig.width=15, fig.height=4}
+h <- ggplot(stability) + geom_point(aes(tau, H)) + scale_x_log10() + labs(title = "Hamiltonian") + theme_light()
+p <- ggplot(stability) + geom_point(aes(tau, P)) + scale_x_log10() + labs(title = "Pressure") + theme_light()
+t <- ggplot(stability) + geom_point(aes(tau, T)) + scale_x_log10() + labs(title = "Temperature") + theme_light()
+
+grid.arrange(h, p, t, nrow = 1)
 ```
 
 
+
 ```{r}
-df <- read.csv("5_1_out.csv", header = F)
-colnames(df) <- c("t", "H", "V", "T", "P") 
-head(df)
+library(latex2exp)
+tau_e6 <- read.csv("output/5_1_out_tau=1e-6.csv", header = F)
+tau_e2 <- read.csv("output/5_1_out_tau=1e-2.csv", header = F)
+
+colnames(tau_e6) <- c("t", "H", "V", "T", "P")
+colnames(tau_e2) <- c("t", "H", "V", "T", "P")
 ```
 
 ### Hamiltonian
-```{r}
-ggplot(df) +
-    geom_point(aes(t, T)) +
-    labs(x = "t [ps]", y = "H []", title = "Hamiltonian") + 
+```{r, fig.width=10, fig.height=5}
+ggplot(tau_e6, aes(t, H)) +
+    geom_point(aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e2, aes(color = "tau = 10^-2")) +
+    labs(x = "t [ps]", y = "H", title = "Hamiltonian") +
     theme_light()
 ```
 
 ### Temperature
-```{r}
-ggplot(df) +
-    geom_point(aes(t, T)) +
-    labs(x = "t [ps]", y = "T [K]", title = "Temperature") + 
+```{r, fig.width=10, fig.height=5}
+ggplot(tau_e6, aes(t, T)) +
+    geom_point(aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e2, aes(color = "tau = 10^-2")) +
+    labs(x = "t [ps]", y = "T", title = "Temperature") +
     theme_light()
 ```
-
-
-### Potential
-```{r}
-ggplot(df) +
-    geom_point(aes(t, V)) +
-    labs(x = "t [ps]", y = "V []", title = "Potential") + 
-    theme_light()
-```
-
 
 ### Pressure
-```{r}
-ggplot(df) +
-    geom_point(aes(t, P)) +
-    labs(x = "t [ps]", y = "P []", title = "Pressure") + 
+```{r, fig.width=10, fig.height=5}
+ggplot(tau_e6, aes(t, P)) +
+    geom_point(aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e2, aes(color = "tau = 10^-2")) +
+    labs(x = "t [ps]", y = "P", title = "Pressure") +
     theme_light()
 ```
-

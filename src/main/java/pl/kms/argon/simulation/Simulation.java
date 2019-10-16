@@ -15,7 +15,7 @@ import static pl.kms.argon.constants.Constants.*;
 public class Simulation {
 
     private List<Atom> atoms = new ArrayList<>((int) N.getValue());
-    private Generator generator = new Generator();
+    private Generator generator = new Generator(123);
 
     public void run(String positionsFile, String meanValuesFile) {
         initialize();
@@ -29,8 +29,7 @@ public class Simulation {
         for (int i0 = 0; i0 < nVal; i0++) {
             for (int i1 = 0; i1 < nVal; i1++) {
                 for (int i2 = 0; i2 < nVal; i2++) {
-
-                    int i = i0 + i1 * nVal + i2 * nVal * nVal;
+                    initializeBsVectors();
                     b0.multPos(i0 - nDividedBy2);
                     b1.multPos(i1 - nDividedBy2);
                     b2.multPos(i2 - nDividedBy2);
@@ -43,8 +42,6 @@ public class Simulation {
 
                     P.setMomentum(P.px + p0, P.py + p1, P.pz + p2);
                     atoms.add(r0);
-
-                    initializeBsVectors();
                 }
             }
         }
@@ -62,9 +59,10 @@ public class Simulation {
         for (int s = 0; s < S; s++) {
             atoms.forEach(atom -> {
                 // (18a)
-                atom.px += 0.5 * atom.Fx * tau.getValue();
-                atom.py += 0.5 * atom.Fy * tau.getValue();
-                atom.pz += 0.5 * atom.Fz * tau.getValue();
+                double pTmp = 0.5 * tau.getValue();
+                atom.px += pTmp * atom.Fx;
+                atom.py += pTmp * atom.Fy;
+                atom.pz += pTmp * atom.Fz;
 
                 // (18b)
                 double rTmp = 1 / m.getValue() * tau.getValue();
@@ -74,9 +72,10 @@ public class Simulation {
             });
             Pair<Double, Double> p = calculateForcesAndPotentials(atoms);
             atoms.forEach(atom -> {
-                atom.px += 0.5 * atom.Fx * tau.getValue();
-                atom.py += 0.5 * atom.Fy * tau.getValue();
-                atom.pz += 0.5 * atom.Fz * tau.getValue();
+                double pTmp = 0.5 * tau.getValue();
+                atom.px += pTmp * atom.Fx;
+                atom.py += pTmp * atom.Fy;
+                atom.pz += pTmp * atom.Fz;
             });
 
             // Temporary values
@@ -172,8 +171,8 @@ public class Simulation {
 
     private double calculateKineticEnergy() {
         return atoms.stream()
-                .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2) / (2 * m.getValue()))
-                .sum();
+                .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2))
+                .sum() / (2 * m.getValue());
     }
 
     private double calculateTemperature(double kineticEnergy) {
@@ -230,6 +229,14 @@ public class Simulation {
                 double energy = Math.pow(atom.absMomentum(), 2) / (2 * m.getValue());
                 out.println(atom.x + "," + atom.y + "," + atom.z + "," + energy);
             });
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveMetricsForStability(double Hmean, double Pmean, double Tmean) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream("stability_v1.csv", true))) {
+            out.println(tau.getValue() + "," + Hmean + "," + Pmean + "," + Tmean);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

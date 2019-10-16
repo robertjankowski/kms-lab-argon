@@ -11,16 +11,13 @@ import java.nio.file.Paths;
 public class Boot {
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; ++i) {
-            Loader.loadParameters("5_1_Test_programu.txt");
-            Simulation simulation = new Simulation();
-            String posFile = "5_1_pos.csv";
-            String outFile = "5_1_out.csv";
-            removeFileIfExists(posFile);
-            removeFileIfExists(outFile);
-            System.out.println("Iteration: " + i);
-            simulation.run(posFile, outFile);
-        }
+        Loader.loadParameters("input/5_1_Test_programu.txt");
+        Simulation simulation = new Simulation();
+        String posFile = "output/5_1_pos.csv";
+        String outFile = "output/5_1_out_tau=1e-2.csv";
+        //  removeFileIfExists(posFile);
+        // removeFileIfExists(outFile);
+        simulation.run(posFile, outFile);
     }
 
     private static void removeFileIfExists(String file) {
