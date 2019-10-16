@@ -1,0 +1,69 @@
+---
+title: "argon-visualization"
+author: "Robert Jankowski"
+date: "16/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# E_mean od tau
+# H od t
+# E_k, V, P od t
+
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gridExtra)
+```
+
+### Testing stability
+```{r}
+stability <- read.csv("output/stability.csv", header = F)
+colnames(stability) <- c("tau", "H", "P", "T")
+head(stability)
+```
+
+```{r, fig.width=15, fig.height=4}
+h <- ggplot(stability) + geom_point(aes(tau, H)) + scale_x_log10() + labs(title = "Hamiltonian") + theme_light()
+p <- ggplot(stability) + geom_point(aes(tau, P)) + scale_x_log10() + labs(title = "Pressure") + theme_light()
+t <- ggplot(stability) + geom_point(aes(tau, T)) + scale_x_log10() + labs(title = "Temperature") + theme_light()
+
+grid.arrange(h, p, t, nrow = 1)
+```
+
+
+
+```{r}
+library(latex2exp)
+tau_e6 <- read.csv("output/5_1_out_tau=1e-6.csv", header = F)
+tau_e2 <- read.csv("output/5_1_out_tau=1e-2.csv", header = F)
+
+colnames(tau_e6) <- c("t", "H", "V", "T", "P")
+colnames(tau_e2) <- c("t", "H", "V", "T", "P")
+```
+
+### Hamiltonian
+```{r, fig.width=10, fig.height=5}
+ggplot(tau_e6, aes(t, H)) +
+    geom_point(aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e2, aes(color = "tau = 10^-2")) +
+    labs(x = "t [ps]", y = "H", title = "Hamiltonian") +
+    theme_light()
+```
+
+### Temperature
+```{r, fig.width=10, fig.height=5}
+ggplot(tau_e6, aes(t, T)) +
+    geom_point(aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e2, aes(color = "tau = 10^-2")) +
+    labs(x = "t [ps]", y = "T", title = "Temperature") +
+    theme_light()
+```
+
+### Pressure
+```{r, fig.width=10, fig.height=5}
+ggplot(tau_e6, aes(t, P)) +
+    geom_point(aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e2, aes(color = "tau = 10^-2")) +
+    labs(x = "t [ps]", y = "P", title = "Pressure") +
+    theme_light()
+```

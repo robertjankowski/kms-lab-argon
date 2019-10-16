@@ -1,20 +1,17 @@
 package pl.kms.argon.generator;
 
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Generator {
 
     private Random random;
-    private ThreadLocalRandom threadLocalRandom;
 
-    public Generator() {
-        random = new Random();
-        threadLocalRandom = ThreadLocalRandom.current();
+    public Generator(int seed) {
+        random = new Random(seed);
     }
 
     public double uniform(int min, int max) {
-        return threadLocalRandom.nextDouble(min, max);
+        return min + (max - min) * random.nextDouble();
     }
 
     public boolean nextBoolean() {
