@@ -5,7 +5,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
-import java.awt.*;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.io.BufferedReader;
@@ -112,6 +112,5 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
     }
 }
