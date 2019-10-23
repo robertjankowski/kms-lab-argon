@@ -27,8 +27,8 @@ public class AtomSphere {
 
     private double transform(double p) {
         // Scale to [-1, 1]
-        double max = 2;
-        double min = -2;
+        double max = 3;
+        double min = -3;
         return 2 * (p - min) / (max - min) - 1;
     }
 

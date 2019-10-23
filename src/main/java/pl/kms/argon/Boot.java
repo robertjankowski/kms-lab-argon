@@ -13,9 +13,9 @@ import static pl.kms.argon.constants.Constants.*;
 public class Boot {
 
     public static void main(String[] args) {
-        // melting point: 83.75
-        double initialT = 60;
-        for (int i = 0; i < 20; ++i) {
+        // melting point: 83.75K
+        double initialT = 50;
+        for (int i = 0; i < 10; ++i) {
             Loader.loadParameters("input/5_3_Topnienie_krysztalu.txt");
             T0.setValue(initialT);
             Simulation simulation = new Simulation();
@@ -27,7 +27,7 @@ public class Boot {
             simulation.run(posFile, outFile);
             long elapsed = System.currentTimeMillis() - start;
             System.out.println("Elapsed: " + elapsed + "ms");
-            initialT += 2;
+            initialT += 10;
         }
     }
 

@@ -29,7 +29,7 @@ public class Main {
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.setVisible(true);
 
-        final FPSAnimator animator = new FPSAnimator(canvas, 200, true);
+        final FPSAnimator animator = new FPSAnimator(canvas, 400, false);
         animator.start();
         frame.addWindowListener(new WindowAdapter() {
             @Override
