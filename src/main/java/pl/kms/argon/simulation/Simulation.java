@@ -55,6 +55,7 @@ public class Simulation {
         double Tmean = 0;
         double Pmean = 0;
         double Hmean = 0;
+        double Vmean = 0;
         double t = 0.0;
         for (int s = 0; s < S; s++) {
             atoms.forEach(atom -> {
@@ -91,6 +92,7 @@ public class Simulation {
                 Tmean += T;
                 Pmean += P;
                 Hmean += H;
+                Vmean += V;
             }
 
             if (s % Sout.getValue() == 0)
@@ -102,9 +104,12 @@ public class Simulation {
         Tmean /= Sd.getValue();
         Pmean /= Sd.getValue();
         Hmean /= Sd.getValue();
+        Vmean /= Sd.getValue();
         System.out.println("T_mean: = " + Tmean);
         System.out.println("P_mean: = " + Pmean);
         System.out.println("H_mean: = " + Hmean);
+        System.out.println("V_mean: = " + Vmean);
+        // saveMetricsForProperA(Vmean);
     }
 
     private Pair<Double, Double> calculateForcesAndPotentials(List<Atom> atoms) {
@@ -237,6 +242,14 @@ public class Simulation {
     private void saveMetricsForStability(double Hmean, double Pmean, double Tmean) {
         try (PrintWriter out = new PrintWriter(new FileOutputStream("stability_v1.csv", true))) {
             out.println(tau.getValue() + "," + Hmean + "," + Pmean + "," + Tmean);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveMetricsForProperA(double Vmean) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/a_testing_v2.csv", true))) {
+            out.println(a.getValue() + "," + Vmean);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

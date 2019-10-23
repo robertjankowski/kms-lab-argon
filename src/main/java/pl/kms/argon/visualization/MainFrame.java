@@ -3,13 +3,18 @@ package pl.kms.argon.visualization;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.awt.TextRenderer;
 
-import java.awt.Font;
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -19,17 +24,20 @@ import java.util.List;
 
 public class MainFrame implements GLEventListener, MouseMotionListener {
 
-    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_1_pos.csv");
+    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_3_pos_T=90.0.csv");
     private TextRenderer timeRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
-    private final int N = 27;
+    private final int N = 125;
     private final double tau = 1e-2;
     private String tauFormat = "0.00";
     private double timestep = 0.0; // ps
     private int iteration = 0;
+    private double L = 2.3 / 3; //  Sphere with L radius
+    private AtomSphere sphere = new AtomSphere(0, 0, 0, L);
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
         System.out.println("Atoms: " + atomSpheres.size() + "   in array:" + atomSpheres.get(0).length);
+        sphere.setColor(new float[]{0, 0, 1, 0.2f});
     }
 
     @Override
@@ -50,11 +58,40 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
         renderTimestep();
         if (iteration < atomSpheres.size())
             for (AtomSphere atom : atomSpheres.get(iteration))
-                atom.draw(gl);
+                atom.draw(gl, true);
         else
             resetSimulation();
         iteration++;
+        sphere.draw(gl, false);
+
+        /*
+        try {
+            saveAnimationSnapshots(gl, iteration);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+         */
+
         gl.glFlush();
+    }
+
+
+    private void saveAnimationSnapshots(GL2 gl, int iteration) throws IOException {
+        BufferedImage screenshot = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB);
+        Graphics graphics = screenshot.getGraphics();
+        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(800 * 800 * 4);
+        gl.glReadBuffer(gl.GL_BACK);
+        gl.glReadPixels(0, 0, 800, 800, gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, buffer);
+        for (int h = 0; h < 800; h++) {
+            for (int w = 0; w < 800; w++) {
+                graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
+                        (buffer.get() & 0xff)));
+                buffer.get();   // consume alpha
+                graphics.drawRect(w, 800 - h, 1, 1);
+            }
+        }
+        File outputfile = new File("animation" + iteration + ".png");
+        ImageIO.write(screenshot, "png", outputfile);
     }
 
     @Override
