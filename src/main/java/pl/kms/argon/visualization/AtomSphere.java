@@ -1,6 +1,7 @@
 package pl.kms.argon.visualization;
 
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.util.gl2.GLUT;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -10,13 +11,18 @@ public class AtomSphere {
     private double x, y, z;
     private double radius;
     private float[] color;
+    private GLUT glut = new GLUT();
 
     public AtomSphere(double x, double y, double z, double radius) {
         this.x = transform(x);
         this.y = transform(y);
         this.z = transform(z);
         this.radius = radius;
-        this.color = new float[]{1, 0, 0};
+        this.color = new float[]{1, 0, 0, 1};
+    }
+
+    public void setColor(float[] color) {
+        this.color = color;
     }
 
     private double transform(double p) {
@@ -26,7 +32,7 @@ public class AtomSphere {
         return 2 * (p - min) / (max - min) - 1;
     }
 
-    public void draw(GL2 gl2) {
+    public void draw(GL2 gl2, boolean isSolid) {
         // Prepare light parameters.
         float SHINE_ALL_DIRECTIONS = 1;
         float[] lightPos = {-50, 0, 0, SHINE_ALL_DIRECTIONS};
@@ -49,25 +55,11 @@ public class AtomSphere {
 
         gl2.glLoadIdentity();
         gl2.glTranslated(x, y, z);
-        drawSphere(gl2);
-    }
-
-    private void drawSphere(GL2 gl2) {
-        double x, y, z;
-        double gradation = 10;
-        for (double alpha = 0.0; alpha < Math.PI; alpha += Math.PI / gradation) {
-            gl2.glBegin(GL2.GL_TRIANGLE_STRIP);
-            for (double beta = 0.0; beta < 2.01 * Math.PI; beta += Math.PI / gradation) {
-                x = radius * cos(beta) * sin(alpha);
-                y = radius * sin(beta) * sin(alpha);
-                z = radius * cos(alpha);
-                gl2.glVertex3d(x, y, z);
-                x = radius * cos(beta) * sin(alpha + Math.PI / gradation);
-                y = radius * sin(beta) * sin(alpha + Math.PI / gradation);
-                z = radius * cos(alpha + Math.PI / gradation);
-                gl2.glVertex3d(x, y, z);
-            }
-            gl2.glEnd();
+        if (isSolid)
+            glut.glutSolidSphere(radius, 10, 10);
+        else {
+            gl2.glRotatef(45, 1, 0, 0);
+            glut.glutWireSphere(radius, 20, 20);
         }
     }
 

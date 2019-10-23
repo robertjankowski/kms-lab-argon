@@ -51,7 +51,7 @@ h_compare <- ggplot(tau_e2, aes(t, H)) +
     geom_point(aes(color = "tau = 10^-2")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
     geom_point(data = tau_e6, aes(color = "tau = 10^-6"), alpha = 0.2) +
-    labs(x = "t [ps]", y = "H", title = "Hamiltonian") +
+    labs(x = "t [ps]", y = "H [kJ/mol]", title = "Hamiltonian") +
     theme_light()
 
 # ggsave(filename = "h_compare.png", h_compare, width = 12, height = 6)
@@ -64,7 +64,7 @@ t_compare <- ggplot(tau_e2, aes(t, T)) +
     geom_point(aes(color = "tau = 10^-2")) +
     geom_point(data = tau_e6, aes(color = "tau = 10^-6")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
-    labs(x = "t [ps]", y = "T", title = "Temperature") +
+    labs(x = "t [ps]", y = "T [K]", title = "Temperature") +
     theme_light()
 
 # ggsave(filename = "t_compare.png", t_compare, width = 12, height = 6)
@@ -77,9 +77,61 @@ p_compare <- ggplot(tau_e2, aes(t, P)) +
     geom_point(aes(color = "tau = 10^-2")) +
     geom_point(data = tau_e6, aes(color = "tau = 10^-6")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
-    labs(x = "t [ps]", y = "P", title = "Pressure") +
+    labs(x = "t [ps]", y = "P [x 16.6 atm.]", title = "Pressure") +
     theme_light()
 
 # ggsave(filename = "p_compare.png", p_compare, width = 12, height = 6)
 p_compare
 ```
+
+
+## 5.2 Kryształ
+```{r}
+a_testing <- read.csv("output/a_testing.csv", header = F)
+colnames(a_testing) <- c("a", "V")
+```
+
+```{r}
+a_min <- a_testing %>%
+    filter(V == min(a_testing$V))
+a_min
+```
+
+
+```{r}
+ggplot(a_testing) +
+    geom_point(aes(a, V)) +
+    geom_vline(xintercept = a_min$a, color = "red") + 
+    labs(x = "a [nm]", y = "V [kJ/mol]", title = "Testing proper `a`") + 
+    theme_light()
+```
+
+
+```{r}
+testing_T_mean <- read.csv("output/5_2_out_tau=1e-4.csv", header = T)
+colnames(testing_T_mean) <- c("t", "H", "V", "T", "P")
+```
+
+```{r}
+ggplot(testing_T_mean) +
+    geom_point(aes(t, T), alpha = 0.3) + 
+    labs(x = "t [ps]", y = "T [K]") +
+    theme_light()
+```
+
+
+## 5.3 Topnienie kryształu 
+
+```{r}
+tmp <- read.csv("output/5_3_out_tau=1e-4.csv", header = T)
+colnames(tmp) <- c("t", "H", "V", "T", "P")
+```
+
+```{r}
+ggplot(tmp) +
+    geom_point(aes(t, T), alpha = 0.3) + 
+    labs(x = "t [ps]") + 
+    theme_light()
+```
+
+

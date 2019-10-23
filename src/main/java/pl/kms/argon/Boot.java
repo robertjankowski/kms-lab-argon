@@ -8,19 +8,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static pl.kms.argon.constants.Constants.*;
+
 public class Boot {
 
     public static void main(String[] args) {
-        Loader.loadParameters("input/5_1_Test_programu.txt");
-        Simulation simulation = new Simulation();
-        String posFile = "output/5_1_pos.csv";
-        String outFile = "output/5_1_out_tau=1e-3.csv";
-        removeFileIfExists(posFile);
-        removeFileIfExists(outFile);
-        long start = System.currentTimeMillis();
-        simulation.run(posFile, outFile);
-        long elapsed = System.currentTimeMillis() - start;
-        System.out.println("Elapsed: " + elapsed + "ms");
+        // melting point: 83.75
+        double initialT = 60;
+        for (int i = 0; i < 20; ++i) {
+            Loader.loadParameters("input/5_3_Topnienie_krysztalu.txt");
+            T0.setValue(initialT);
+            Simulation simulation = new Simulation();
+            String posFile = "output/5_3_pos_T=" + T0.getValue() + ".csv";
+            String outFile = "output/tmp.csv";
+            removeFileIfExists(posFile);
+            removeFileIfExists(outFile);
+            long start = System.currentTimeMillis();
+            simulation.run(posFile, outFile);
+            long elapsed = System.currentTimeMillis() - start;
+            System.out.println("Elapsed: " + elapsed + "ms");
+            initialT += 2;
+        }
     }
 
     private static void removeFileIfExists(String file) {

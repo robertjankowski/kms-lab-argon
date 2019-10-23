@@ -19,17 +19,20 @@ import java.util.List;
 
 public class MainFrame implements GLEventListener, MouseMotionListener {
 
-    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_1_pos.csv");
+    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_3_pos.csv");
     private TextRenderer timeRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
-    private final int N = 27;
-    private final double tau = 1e-2;
-    private String tauFormat = "0.00";
+    private final int N = 125;
+    private final double tau = 1e-3;
+    private String tauFormat = "0.000";
     private double timestep = 0.0; // ps
     private int iteration = 0;
+    private double L = 1.2 / 2; //  Sphere with L radius
+    private AtomSphere sphere = new AtomSphere(0, 0, 0, L);
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
         System.out.println("Atoms: " + atomSpheres.size() + "   in array:" + atomSpheres.get(0).length);
+        sphere.setColor(new float[]{0, 0, 1, 0.2f});
     }
 
     @Override
@@ -50,10 +53,11 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
         renderTimestep();
         if (iteration < atomSpheres.size())
             for (AtomSphere atom : atomSpheres.get(iteration))
-                atom.draw(gl);
+                atom.draw(gl, true);
         else
             resetSimulation();
         iteration++;
+        sphere.draw(gl, false);
         gl.glFlush();
     }
 
