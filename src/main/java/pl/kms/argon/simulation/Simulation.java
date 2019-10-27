@@ -71,7 +71,7 @@ public class Simulation {
                 atom.y += rTmp * atom.py;
                 atom.z += rTmp * atom.pz;
             });
-            Pair<Double, Double> p = calculateForcesAndPotentials(atoms);
+            var p = calculateForcesAndPotentials(atoms);
             atoms.forEach(atom -> {
                 double pTmp = 0.5 * tau.getValue();
                 atom.px += pTmp * atom.Fx;
