@@ -24,7 +24,7 @@ import java.util.List;
 
 public class MainFrame implements GLEventListener, MouseMotionListener {
 
-    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_3_pos_T0=90.0.csv");
+    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_4_pos_S0=20000.0.csv");
     private TextRenderer timeRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
     private final int N = 125;
     private final double tau = 1e-2;

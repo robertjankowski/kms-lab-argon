@@ -111,6 +111,8 @@ public class Simulation {
         System.out.println("H_mean: = " + Hmean);
         System.out.println("V_mean: = " + Vmean);
         // saveMetricsForProperA(Vmean);
+        // saveMetricsForProperS0(Tmean, Pmean);
+        saveMetricsForProperCompareWithIdealGas(Tmean, Pmean);
     }
 
     private Pair<Double, Double> calculateForcesAndPotentials(List<Atom> atoms) {
@@ -251,6 +253,22 @@ public class Simulation {
     private void saveMetricsForProperA(double Vmean) {
         try (PrintWriter out = new PrintWriter(new FileOutputStream("output/a_testing_v2.csv", true))) {
             out.println(a.getValue() + "," + Vmean);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveMetricsForProperS0(double Tmean, double Pmean) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/5_4_S0_testing_tau=1e-3.csv", true))) {
+            out.println(So.getValue() + "," + Tmean + "," + Pmean);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveMetricsForProperCompareWithIdealGas(double Tmean, double Pmean) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/5_4_Ideal_gas_testing.csv", true))) {
+            out.println(T0.getValue() + "," + Tmean + "," + Pmean);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

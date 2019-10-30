@@ -78,7 +78,9 @@ p_compare <- ggplot(tau_e2, aes(t, P)) +
     geom_point(data = tau_e6, aes(color = "tau = 10^-6")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
     labs(x = "t [ps]", y = "P [x 16.6 atm.]", title = "Pressure") +
-    theme_light()
+    theme_light() +
+    theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 12))
 
 # ggsave(filename = "p_compare.png", p_compare, width = 12, height = 6)
 p_compare
@@ -122,10 +124,10 @@ ggplot(testing_T_mean) +
 ## 5.3 Topnienie kryształu 
 
 ```{r}
-T070 <- read.csv("output/5_3_out_T0=70.0.csv", header = T)
-T080 <- read.csv("output/5_3_out_T0=80.0.csv", header = T)
-T090 <- read.csv("output/5_3_out_T0=90.0.csv", header = T)
-T0100 <- read.csv("output/5_3_out_T0=100.0.csv", header = T)
+T070 <- read.csv("output/5_3_out_T0=70.0.csv", header = F)
+T080 <- read.csv("output/5_3_out_T0=80.0.csv", header = F)
+T090 <- read.csv("output/5_3_out_T0=90.0.csv", header = F)
+T0100 <- read.csv("output/5_3_out_T0=100.0.csv", header = F)
 
 colnames(T070) <- c("t", "H", "V", "T", "P")
 colnames(T080) <- c("t", "H", "V", "T", "P")
@@ -133,26 +135,39 @@ colnames(T090) <- c("t", "H", "V", "T", "P")
 colnames(T0100) <- c("t", "H", "V", "T", "P")
 ```
 
-```{r, fig.width=12, fig.height=5}
+```{r, fig.width=10, fig.height=7}
 ggplot() +
     geom_point(data = T070, aes(t, T, color = "70K")) +
     geom_point(data = T080, aes(t, T, color = "80K")) +
     geom_point(data = T090, aes(t, T, color = "90K")) +
     geom_point(data = T0100, aes(t, T, color = "100K")) +
-    theme_light()
+    labs(color = "T0") +
+    theme_light() +
+    theme(legend.position = "top",
+          legend.text = element_text(size = 12))
 ```
 
 ## 5.4 Gaz
 
 ### Finding right `S0`
 
+##
+## TODO: change tau to 1e-4 and calulcate S0 once again !!
+##
+
 ```{r}
-s0_testing <- read.csv("output/5_4_S0_testing.csv", header = T)
+s0_testing <- read.csv("output/5_4_S0_testing.csv", header = F)
+colnames(s0_testing) <- c("S0", "T", "P")
+```
+
+```{r}
+s0_min <- s0_testing[43,]
 ```
 
 ```{r}
 ggplot(s0_testing) + 
     geom_point(aes(S0, T)) +
+    geom_hline(yintercept = s0_min$T, color = "blue") + 
     theme_light()
 ```
 
@@ -160,33 +175,27 @@ ggplot(s0_testing) +
 ```{r}
 ggplot(s0_testing) + 
     geom_point(aes(S0, P)) +
+    geom_hline(yintercept = s0_min$P, color = "blue") + 
     theme_light()
 ```
 
+
+
 ```{r}
 S0200 <- read.csv("output/5_4_out_S0=200.0.csv", header = F)
-S0400 <- read.csv("output/5_4_out_S0=400.0.csv", header = F)
-S01000 <- read.csv("output/5_4_out_S0=1000.0.csv", header = F)
-S01400 <- read.csv("output/5_4_out_S0=1400.0.csv", header = F)
-S02000 <- read.csv("output/5_4_out_S0=2000.0.csv", header = F)
-S02200 <- read.csv("output/5_4_out_S0=2200.0.csv", header = F)
+S010000 <- read.csv("output/5_4_out_S0=10000.0.csv", header = F)
+S020000 <- read.csv("output/5_4_out_S0=20000.0.csv", header = F)
 
 colnames(S0200) <- c("t", "H", "V", "T", "P")
-colnames(S0400) <- c("t", "H", "V", "T", "P")
-colnames(S01000) <- c("t", "H", "V", "T", "P")
-colnames(S01400) <- c("t", "H", "V", "T", "P")
-colnames(S02000) <- c("t", "H", "V", "T", "P")
-colnames(S02200) <- c("t", "H", "V", "T", "P")
+colnames(S010000) <- c("t", "H", "V", "T", "P")
+colnames(S020000) <- c("t", "H", "V", "T", "P")
 ```
 
 ```{r, fig.width=12, fig.height=5}
 ggplot() + 
     geom_point(data = S0200, aes(t, P, color = "So=200"), alpha = 0.2) +
-    geom_point(data = S0400, aes(t, P, color = "So=400"), alpha = 0.2) +
-    geom_point(data = S01000, aes(t, P, color = "So=1000"), alpha = 0.2) +
-    geom_point(data = S01400, aes(t, P, color = "So=1400"), alpha = 0.2) +
-    geom_point(data = S02000, aes(t, P, color = "So=2000"), alpha = 0.2) +
-    geom_point(data = S02200, aes(t, P, color = "So=2200"), alpha = 0.2) +
+    geom_point(data = S010000, aes(t, P, color = "So=10000"), alpha = 0.2) +
+    geom_point(data = S020000, aes(t, P, color = "So=20000"), alpha = 0.2) +
     theme_light()
 ```
 
@@ -194,10 +203,38 @@ ggplot() +
 ```{r, fig.width=12, fig.height=5}
 ggplot() + 
     geom_point(data = S0200, aes(t, T, color = "So=200"), alpha = 0.2) +
-    geom_point(data = S0400, aes(t, T, color = "So=400"), alpha = 0.2) +
-    geom_point(data = S01000, aes(t, T, color = "So=1000"), alpha = 0.2) +
-    geom_point(data = S01400, aes(t, T, color = "So=1400"), alpha = 0.2) +
-    geom_point(data = S02000, aes(t, T, color = "So=2000"), alpha = 0.2) +
-    geom_point(data = S02200, aes(t, T, color = "So=2200"), alpha = 0.2) +
+    geom_point(data = S010000, aes(t, T, color = "So=10000"), alpha = 0.2) +
+    geom_point(data = S020000, aes(t, T, color = "So=20000"), alpha = 0.2) +
     theme_light()
 ```
+
+P(T)
+```{r}
+ideal_gas_testing <- read.csv("output/5_4_Ideal_gas_testing.csv", header = F)
+
+colnames(ideal_gas_testing) <- c("T0", "T", "P")
+```
+
+```{r}
+ideal_gas_testing$T
+```
+
+```{r}
+L <- 2.3
+N <- 125
+k_b <- 0.00831
+
+T <- seq(100, 1600, 50)
+P <- 3 / 2 * N * k_b * T / (4 / 3 * pi * L^3)
+
+ideal <- data.frame(T = T, P = P)
+```
+
+
+```{r}
+ggplot(ideal_gas_testing) +
+    geom_point(aes(T, P, color = "Symulacja")) +
+    geom_line(data = ideal, aes(T, P, color = "Gaz doskonały")) +
+    theme_light()
+```
+
