@@ -1,5 +1,6 @@
 package pl.kms.argon.simulation;
 
+import pl.kms.argon.Utils;
 import pl.kms.argon.atom.Atom;
 import pl.kms.argon.generator.Generator;
 import pl.kms.argon.util.Pair;
@@ -125,7 +126,7 @@ public class Simulation {
             double ri = atomI.absPosition();
             if (ri >= L.getValue()) {
                 // (10)
-                double Vtmp = 0.5 * f.getValue() * Math.pow(ri - L.getValue(), 2);
+                double Vtmp = 0.5 * f.getValue() * Utils.power(ri - L.getValue(), 2);
                 V += Vtmp;
 
                 // (14)
@@ -147,8 +148,8 @@ public class Simulation {
                 double yij = atomI.y - atomJ.y;
                 double zij = atomI.z - atomJ.z;
                 double rij = Math.sqrt(xij * xij + yij * yij + zij * zij);
-                double R12 = Math.pow(R.getValue() / rij, 12);
-                double R6 = Math.pow(R.getValue() / rij, 6);
+                double R12 = Utils.power(R.getValue() / rij, 12);
+                double R6 = Utils.power(R.getValue() / rij, 6);
                 // (9)
                 double Vtmp = e.getValue() * (R12 - 2 * R6);
                 V += Vtmp;
@@ -170,13 +171,13 @@ public class Simulation {
             }
             atoms.set(i, atomI);
         }
-        P /= 4 * Math.PI * Math.pow(L.getValue(), 2);
+        P /= 4 * Math.PI * Utils.power(L.getValue(), 2);
         return new Pair<>(V, P);
     }
 
     private double calculateKineticEnergy() {
         return atoms.stream()
-                .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2))
+                .mapToDouble(atom -> Utils.power(atom.absMomentum(), 2))
                 .sum() / (2 * m.getValue());
     }
 
@@ -231,7 +232,7 @@ public class Simulation {
     private void savePositionsWithEnergy(String filename) {
         try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
             atoms.forEach(atom -> {
-                double energy = Math.pow(atom.absMomentum(), 2) / (2 * m.getValue());
+                double energy = Utils.power(atom.absMomentum(), 2) / (2 * m.getValue());
                 out.println(atom.x + "," + atom.y + "," + atom.z + "," + energy);
             });
         } catch (FileNotFoundException e) {

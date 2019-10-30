@@ -119,19 +119,85 @@ ggplot(testing_T_mean) +
     theme_light()
 ```
 
-
 ## 5.3 Topnienie kryształu 
 
 ```{r}
-tmp <- read.csv("output/5_3_out_tau=1e-4.csv", header = T)
-colnames(tmp) <- c("t", "H", "V", "T", "P")
+T070 <- read.csv("output/5_3_out_T0=70.0.csv", header = T)
+T080 <- read.csv("output/5_3_out_T0=80.0.csv", header = T)
+T090 <- read.csv("output/5_3_out_T0=90.0.csv", header = T)
+T0100 <- read.csv("output/5_3_out_T0=100.0.csv", header = T)
+
+colnames(T070) <- c("t", "H", "V", "T", "P")
+colnames(T080) <- c("t", "H", "V", "T", "P")
+colnames(T090) <- c("t", "H", "V", "T", "P")
+colnames(T0100) <- c("t", "H", "V", "T", "P")
+```
+
+```{r, fig.width=12, fig.height=5}
+ggplot() +
+    geom_point(data = T070, aes(t, T, color = "70K")) +
+    geom_point(data = T080, aes(t, T, color = "80K")) +
+    geom_point(data = T090, aes(t, T, color = "90K")) +
+    geom_point(data = T0100, aes(t, T, color = "100K")) +
+    theme_light()
+```
+
+## 5.4 Gaz
+
+### Finding right `S0`
+
+```{r}
+s0_testing <- read.csv("output/5_4_S0_testing.csv", header = T)
 ```
 
 ```{r}
-ggplot(tmp) +
-    geom_point(aes(t, T), alpha = 0.3) + 
-    labs(x = "t [ps]") + 
+ggplot(s0_testing) + 
+    geom_point(aes(S0, T)) +
     theme_light()
 ```
 
 
+```{r}
+ggplot(s0_testing) + 
+    geom_point(aes(S0, P)) +
+    theme_light()
+```
+
+```{r}
+S0200 <- read.csv("output/5_4_out_S0=200.0.csv", header = F)
+S0400 <- read.csv("output/5_4_out_S0=400.0.csv", header = F)
+S01000 <- read.csv("output/5_4_out_S0=1000.0.csv", header = F)
+S01400 <- read.csv("output/5_4_out_S0=1400.0.csv", header = F)
+S02000 <- read.csv("output/5_4_out_S0=2000.0.csv", header = F)
+S02200 <- read.csv("output/5_4_out_S0=2200.0.csv", header = F)
+
+colnames(S0200) <- c("t", "H", "V", "T", "P")
+colnames(S0400) <- c("t", "H", "V", "T", "P")
+colnames(S01000) <- c("t", "H", "V", "T", "P")
+colnames(S01400) <- c("t", "H", "V", "T", "P")
+colnames(S02000) <- c("t", "H", "V", "T", "P")
+colnames(S02200) <- c("t", "H", "V", "T", "P")
+```
+
+```{r, fig.width=12, fig.height=5}
+ggplot() + 
+    geom_point(data = S0200, aes(t, P, color = "So=200"), alpha = 0.2) +
+    geom_point(data = S0400, aes(t, P, color = "So=400"), alpha = 0.2) +
+    geom_point(data = S01000, aes(t, P, color = "So=1000"), alpha = 0.2) +
+    geom_point(data = S01400, aes(t, P, color = "So=1400"), alpha = 0.2) +
+    geom_point(data = S02000, aes(t, P, color = "So=2000"), alpha = 0.2) +
+    geom_point(data = S02200, aes(t, P, color = "So=2200"), alpha = 0.2) +
+    theme_light()
+```
+
+
+```{r, fig.width=12, fig.height=5}
+ggplot() + 
+    geom_point(data = S0200, aes(t, T, color = "So=200"), alpha = 0.2) +
+    geom_point(data = S0400, aes(t, T, color = "So=400"), alpha = 0.2) +
+    geom_point(data = S01000, aes(t, T, color = "So=1000"), alpha = 0.2) +
+    geom_point(data = S01400, aes(t, T, color = "So=1400"), alpha = 0.2) +
+    geom_point(data = S02000, aes(t, T, color = "So=2000"), alpha = 0.2) +
+    geom_point(data = S02200, aes(t, T, color = "So=2200"), alpha = 0.2) +
+    theme_light()
+```

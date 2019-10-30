@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.BiConsumer;
 
-class Utils {
+public class Utils {
 
     static long measureTime(BiConsumer<String, String> func, String posFile, String outFile) {
         long start = System.currentTimeMillis();
@@ -21,6 +21,14 @@ class Utils {
         } catch (IOException e) {
             System.out.println("File not found");
         }
+    }
+
+    public static double power(double x, int pow) {
+        double result = 1;
+        for (int i = 0; i < pow; ++i) {
+            result *= x;
+        }
+        return result;
     }
 
 }
