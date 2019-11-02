@@ -1,14 +1,14 @@
-### Badanie stabilności równania (5.1)
+### Symulacja dynamiki molekularnej
 
-1. Wykresy `E_mean` od `tau` (`tau`  od 10e-6 do 10e-2 ps)
-2. Wykresy niestabilne `H, V, P, T` od `t` i dla stabilnego
-3. 5.2 E(a) a od 0 do 1??, aby energia potencjalna była najmniejsza
-4. 5.3 find `T0` using visualization (save gif of correct T0 using https://ezgif.com/apng-maker)
-5. 5.4 run simulation for selected S0 (50, 100, 150, 200) + 
+1. Badanie stabilności równania (5.1)
+ - Wykresy `E_mean` od `tau` (`tau`  od 10e-6 do 10e-2 ps)
+ - Wykresy niestabilne `H, V, P, T` od `t` i dla stabilnego
+2. 5.2 E(a) a od 0 do 1??, aby energia potencjalna była najmniejsza
+3. 5.3 find `T0` using visualization (save gif of correct T0 using https://ezgif.com/apng-maker)
+4. 5.4 run simulation for selected S0 (50, 100, 150, 200) + 
        plot T(S0) i P(S0) 
        
-6. Na 13.11 sprawozdanie!!
-
+5. Na 13.11 sprawozdanie!!
 
 To convert images into gif :smile:
 ```bash
