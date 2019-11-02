@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TooManyListenersException;
 
 import static pl.kms.argon.constants.Constants.*;
 
@@ -224,11 +225,7 @@ public class Simulation {
     }
 
     private void saveTemporaryValues(String filename, double t, double H, double V, double T, double P) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
-            out.println(t + "," + H + "," + V + "," + T + "," + P);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        saveMetricsToFile(filename, t, H, V, T, P);
     }
 
     private void savePositionsWithEnergy(String filename) {
@@ -243,32 +240,28 @@ public class Simulation {
     }
 
     private void saveMetricsForStability(double Hmean, double Pmean, double Tmean) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream("stability_v1.csv", true))) {
-            out.println(tau.getValue() + "," + Hmean + "," + Pmean + "," + Tmean);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        saveMetricsToFile("output/stability_v1.csv", tau.getValue(), Hmean, Pmean, Tmean);
     }
 
     private void saveMetricsForProperA(double Vmean) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/a_testing_v2.csv", true))) {
-            out.println(a.getValue() + "," + Vmean);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        saveMetricsToFile("output/a_testing_v2.csv", a.getValue(), Vmean);
     }
 
     private void saveMetricsForProperS0(double Tmean, double Pmean) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/5_4_S0_testing_tau=1e-3.csv", true))) {
-            out.println(So.getValue() + "," + Tmean + "," + Pmean);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        saveMetricsToFile("output/5_4_S0_testing_tau=" + tau.getValue() + ".csv", So.getValue(), Tmean, Pmean);
     }
 
     private void saveMetricsForProperCompareWithIdealGas(double Tmean, double Pmean) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/5_4_Ideal_gas_testing.csv", true))) {
-            out.println(T0.getValue() + "," + Tmean + "," + Pmean);
+        saveMetricsToFile("output/5_4_Ideal_gas_testing.csv", T0.getValue(), Tmean, Pmean);
+    }
+
+    private void saveMetricsToFile(String filename, double... params) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < params.length - 1; ++i)
+                sb.append(params[i]).append(",");
+            sb.append(params[params.length - 1]);
+            out.println(sb.toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

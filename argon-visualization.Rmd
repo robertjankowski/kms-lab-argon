@@ -77,7 +77,7 @@ p_compare <- ggplot(tau_e2, aes(t, P)) +
     geom_point(aes(color = "tau = 10^-2")) +
     geom_point(data = tau_e6, aes(color = "tau = 10^-6")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
-    labs(x = "t [ps]", y = "P [x 16.6 atm.]", title = "Pressure") +
+    labs(x = "t [ps]", y = "P [x 16.6 atm.]") + # title = "Pressure"
     theme_light() +
     theme(legend.position = "top", legend.title = element_blank(),
           legend.text = element_text(size = 12))
@@ -151,23 +151,19 @@ ggplot() +
 
 ### Finding right `S0`
 
-##
-## TODO: change tau to 1e-4 and calulcate S0 once again !!
-##
-
 ```{r}
-s0_testing <- read.csv("output/5_4_S0_testing.csv", header = F)
+s0_testing <- read.csv("output/5_4_S0_testing_tau=1.0E-4.csv", header = F)
 colnames(s0_testing) <- c("S0", "T", "P")
 ```
 
 ```{r}
-s0_min <- s0_testing[43,]
+s0_min <- s0_testing[39,]
 ```
 
 ```{r}
 ggplot(s0_testing) + 
     geom_point(aes(S0, T)) +
-    geom_hline(yintercept = s0_min$T, color = "blue") + 
+    geom_vline(xintercept = s0_min$S0, color = "blue") +
     theme_light()
 ```
 
@@ -175,16 +171,16 @@ ggplot(s0_testing) +
 ```{r}
 ggplot(s0_testing) + 
     geom_point(aes(S0, P)) +
-    geom_hline(yintercept = s0_min$P, color = "blue") + 
+    geom_vline(xintercept = s0_min$S0, color = "blue") +
     theme_light()
 ```
 
 
 
 ```{r}
-S0200 <- read.csv("output/5_4_out_S0=200.0.csv", header = F)
+S0200 <- read.csv("output/5_4_out_S0=0.0.csv", header = F)
 S010000 <- read.csv("output/5_4_out_S0=10000.0.csv", header = F)
-S020000 <- read.csv("output/5_4_out_S0=20000.0.csv", header = F)
+S020000 <- read.csv("output/5_4_out_S0=19000.0.csv", header = F)
 
 colnames(S0200) <- c("t", "H", "V", "T", "P")
 colnames(S010000) <- c("t", "H", "V", "T", "P")
@@ -193,22 +189,23 @@ colnames(S020000) <- c("t", "H", "V", "T", "P")
 
 ```{r, fig.width=12, fig.height=5}
 ggplot() + 
-    geom_point(data = S0200, aes(t, P, color = "So=200"), alpha = 0.2) +
-    geom_point(data = S010000, aes(t, P, color = "So=10000"), alpha = 0.2) +
-    geom_point(data = S020000, aes(t, P, color = "So=20000"), alpha = 0.2) +
+    geom_point(data = S0200, aes(t, P, color = "So=0"), alpha = 1) +
+    geom_point(data = S010000, aes(t, P, color = "So=10000"), alpha = 0.1) +
+    geom_point(data = S020000, aes(t, P, color = "So=19000"), alpha = 0.05) +
     theme_light()
 ```
 
 
 ```{r, fig.width=12, fig.height=5}
 ggplot() + 
-    geom_point(data = S0200, aes(t, T, color = "So=200"), alpha = 0.2) +
-    geom_point(data = S010000, aes(t, T, color = "So=10000"), alpha = 0.2) +
-    geom_point(data = S020000, aes(t, T, color = "So=20000"), alpha = 0.2) +
+    geom_point(data = S0200, aes(t, T, color = "So=0"), alpha = 1) +
+    geom_point(data = S010000, aes(t, T, color = "So=10000"), alpha = 0.1) +
+    geom_point(data = S020000, aes(t, T, color = "So=19000"), alpha = 0.03) +
     theme_light()
 ```
 
 P(T)
+
 ```{r}
 ideal_gas_testing <- read.csv("output/5_4_Ideal_gas_testing.csv", header = F)
 
@@ -238,3 +235,35 @@ ggplot(ideal_gas_testing) +
     theme_light()
 ```
 
+
+```{r}
+T0500 <- read.csv("output/5_4_out_T0=500.0.csv", header = F)
+T01000 <- read.csv("output/5_4_out_T0=1000.0.csv", header = F)
+T01500 <- read.csv("output/5_4_out_T0=1500.0.csv", header = F)
+T02000 <- read.csv("output/5_4_out_T0=2000.0.csv", header = F)
+
+colnames(T0500) <- c("t", "H", "V", "T", "P")
+colnames(T01000) <- c("t", "H", "V", "T", "P")
+colnames(T01500) <- c("t", "H", "V", "T", "P")
+colnames(T02000) <- c("t", "H", "V", "T", "P")
+```
+
+```{r, fig.width=12, fig.height=5}
+ggplot() + 
+    geom_line(data = T0500, aes(t, T, color = "T0=500"), alpha = 1) +
+    geom_line(data = T01000, aes(t, T, color = "T0=1000"), alpha = 1) +
+    geom_line(data = T01500, aes(t, T, color = "T0=1500"), alpha = 1) +
+    geom_line(data = T02000, aes(t, T, color = "T0=2000"), alpha = 1) +
+    geom_vline(xintercept = 1.9, alpha = 0.4) +
+    theme_light()
+```
+
+```{r, fig.width=12, fig.height=5}
+ggplot() + 
+    geom_line(data = T0500, aes(t, P, color = "T0=500"), alpha = 1) +
+    geom_line(data = T01000, aes(t, P, color = "T0=1000"), alpha = 1) +
+    geom_line(data = T01500, aes(t, P, color = "T0=1500"), alpha = 1) +
+    geom_line(data = T02000, aes(t, P, color = "T0=2000"), alpha = 1) +
+    geom_vline(xintercept = 1.9, alpha = 0.4) +
+    theme_light()
+```
