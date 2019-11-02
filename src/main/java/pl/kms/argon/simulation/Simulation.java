@@ -1,5 +1,6 @@
 package pl.kms.argon.simulation;
 
+import pl.kms.argon.Utils;
 import pl.kms.argon.atom.Atom;
 import pl.kms.argon.generator.Generator;
 import pl.kms.argon.util.Pair;
@@ -9,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TooManyListenersException;
 
 import static pl.kms.argon.constants.Constants.*;
 
@@ -71,7 +73,7 @@ public class Simulation {
                 atom.y += rTmp * atom.py;
                 atom.z += rTmp * atom.pz;
             });
-            Pair<Double, Double> p = calculateForcesAndPotentials(atoms);
+            var p = calculateForcesAndPotentials(atoms);
             atoms.forEach(atom -> {
                 double pTmp = 0.5 * tau.getValue();
                 atom.px += pTmp * atom.Fx;
@@ -110,6 +112,8 @@ public class Simulation {
         System.out.println("H_mean: = " + Hmean);
         System.out.println("V_mean: = " + Vmean);
         // saveMetricsForProperA(Vmean);
+        // saveMetricsForProperS0(Tmean, Pmean);
+        saveMetricsForProperCompareWithIdealGas(Tmean, Pmean);
     }
 
     private Pair<Double, Double> calculateForcesAndPotentials(List<Atom> atoms) {
@@ -125,7 +129,7 @@ public class Simulation {
             double ri = atomI.absPosition();
             if (ri >= L.getValue()) {
                 // (10)
-                double Vtmp = 0.5 * f.getValue() * Math.pow(ri - L.getValue(), 2);
+                double Vtmp = 0.5 * f.getValue() * Utils.power(ri - L.getValue(), 2);
                 V += Vtmp;
 
                 // (14)
@@ -147,8 +151,8 @@ public class Simulation {
                 double yij = atomI.y - atomJ.y;
                 double zij = atomI.z - atomJ.z;
                 double rij = Math.sqrt(xij * xij + yij * yij + zij * zij);
-                double R12 = Math.pow(R.getValue() / rij, 12);
-                double R6 = Math.pow(R.getValue() / rij, 6);
+                double R12 = Utils.power(R.getValue() / rij, 12);
+                double R6 = Utils.power(R.getValue() / rij, 6);
                 // (9)
                 double Vtmp = e.getValue() * (R12 - 2 * R6);
                 V += Vtmp;
@@ -170,13 +174,13 @@ public class Simulation {
             }
             atoms.set(i, atomI);
         }
-        P /= 4 * Math.PI * Math.pow(L.getValue(), 2);
+        P /= 4 * Math.PI * Utils.power(L.getValue(), 2);
         return new Pair<>(V, P);
     }
 
     private double calculateKineticEnergy() {
         return atoms.stream()
-                .mapToDouble(atom -> Math.pow(atom.absMomentum(), 2))
+                .mapToDouble(atom -> Utils.power(atom.absMomentum(), 2))
                 .sum() / (2 * m.getValue());
     }
 
@@ -221,17 +225,13 @@ public class Simulation {
     }
 
     private void saveTemporaryValues(String filename, double t, double H, double V, double T, double P) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
-            out.println(t + "," + H + "," + V + "," + T + "," + P);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        saveMetricsToFile(filename, t, H, V, T, P);
     }
 
     private void savePositionsWithEnergy(String filename) {
         try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
             atoms.forEach(atom -> {
-                double energy = Math.pow(atom.absMomentum(), 2) / (2 * m.getValue());
+                double energy = Utils.power(atom.absMomentum(), 2) / (2 * m.getValue());
                 out.println(atom.x + "," + atom.y + "," + atom.z + "," + energy);
             });
         } catch (FileNotFoundException e) {
@@ -240,16 +240,28 @@ public class Simulation {
     }
 
     private void saveMetricsForStability(double Hmean, double Pmean, double Tmean) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream("stability_v1.csv", true))) {
-            out.println(tau.getValue() + "," + Hmean + "," + Pmean + "," + Tmean);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        saveMetricsToFile("output/stability_v1.csv", tau.getValue(), Hmean, Pmean, Tmean);
     }
 
     private void saveMetricsForProperA(double Vmean) {
-        try (PrintWriter out = new PrintWriter(new FileOutputStream("output/a_testing_v2.csv", true))) {
-            out.println(a.getValue() + "," + Vmean);
+        saveMetricsToFile("output/a_testing_v2.csv", a.getValue(), Vmean);
+    }
+
+    private void saveMetricsForProperS0(double Tmean, double Pmean) {
+        saveMetricsToFile("output/5_4_S0_testing_tau=" + tau.getValue() + ".csv", So.getValue(), Tmean, Pmean);
+    }
+
+    private void saveMetricsForProperCompareWithIdealGas(double Tmean, double Pmean) {
+        saveMetricsToFile("output/5_4_Ideal_gas_testing.csv", T0.getValue(), Tmean, Pmean);
+    }
+
+    private void saveMetricsToFile(String filename, double... params) {
+        try (PrintWriter out = new PrintWriter(new FileOutputStream(filename, true))) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < params.length - 1; ++i)
+                sb.append(params[i]).append(",");
+            sb.append(params[params.length - 1]);
+            out.println(sb.toString());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

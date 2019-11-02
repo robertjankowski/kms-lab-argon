@@ -5,6 +5,10 @@
  - Wykresy niestabilne `H, V, P, T` od `t` i dla stabilnego
 2. 5.2 E(a) a od 0 do 1??, aby energia potencjalna była najmniejsza
 3. 5.3 find `T0` using visualization (save gif of correct T0 using https://ezgif.com/apng-maker)
+4. 5.4 run simulation for selected S0 (50, 100, 150, 200) + 
+       plot T(S0) i P(S0) 
+       
+5. Na 13.11 sprawozdanie!!
 
 To convert images into gif :smile:
 ```bash
