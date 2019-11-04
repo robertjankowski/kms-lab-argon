@@ -21,16 +21,16 @@ library(latex2exp)
 ```{r}
 stability <- read.csv("output/stability.csv", header = F)
 colnames(stability) <- c("tau", "H", "P", "T")
-head(stability)
+# head(stability)
 ```
 
-```{r, fig.width=15, fig.height=4}
+```{r, fig.width=6, fig.height=4}
 h <- ggplot(stability) + 
     geom_point(aes(tau, H)) + 
     scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
     # labs(title = "Hamiltonian") + 
-    labs(y = "H [kJ/mol]",  x = TeX("$\\tau$")) +
+    labs(y = "H [kJ/mol]", x= TeX("$\\tau \\, \\[ps\\]$")) +
     theme_light() + 
     theme(text = element_text(size = 14))
 
@@ -39,7 +39,7 @@ p <- ggplot(stability) +
     scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
     # labs(title = "Pressure") + 
-    labs(y = "P [x 16.6 atm.]", x = TeX("$\\tau$")) +
+    labs(y = "P [x 16.6 atm.]", x=TeX("$\\tau \\, \\[ps\\]$")) +
     theme_light() + 
     theme(text = element_text(size = 14))
 
@@ -48,7 +48,7 @@ t <- ggplot(stability) +
     scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
     # labs(title = "Temperature") + 
-    labs(y = "T [K]",  x = TeX("$\\tau$")) +
+    labs(y = "T [K]",  x = TeX("$\\tau \\, \\[ps\\]$")) +
     theme_light() + 
     theme(text = element_text(size = 14))
 
@@ -88,7 +88,7 @@ h_compare <- ggplot(tau_e2, aes(t, H)) +
 # ggsave(filename = "h_compare.png", h_compare, width = 12, height = 6)
 h_compare 
 
-ggsave(filename="plots/5_1_tau_compare_H.pdf", plot=h_compare, width = 6, height = 4, units = "in")
+# ggsave(filename="plots/5_1_tau_compare_H.pdf", plot=h_compare, width = 6, height = 4, units = "in")
 ```
 
 ### Temperature
@@ -162,13 +162,15 @@ colnames(testing_T_mean) <- c("t", "H", "V", "T", "P")
 
 ```{r}
 testing_T_mean_plot <- ggplot(testing_T_mean) +
-    geom_point(aes(t, T), alpha = 0.3) + 
+    geom_point(aes(t, T), alpha = 0.1) + 
     labs(x = "t [ps]", y = "T [K]") +
     theme_light() +
         theme(legend.position = "top", legend.title = element_blank(),
           legend.text = element_text(size = 13), text = element_text(size = 14))
 
-# ggsave(filename="plots/5_2_T_mean.pdf", plot=testing_T_mean_plot, width = 6, height = 4, units = "in")
+# ggsave(filename="plots/5_2_T_mean.pdf", plot = testing_T_mean_plot, 
+       # width = 6, height = 4, units = "in")
+testing_T_mean_plot
 ```
 
 ## 5.3 Topnienie kryształu 
@@ -306,7 +308,7 @@ p_t <- ggplot(ideal_gas_testing) +
           legend.text = element_text(size = 13), text = element_text(size = 14)) +
     guides(color = guide_legend(override.aes = list(size=3)))
 
-# ggsave(filename="plots/5_4_p_t.pdf", plot=p_t, width = 6, height = 4, units = "in")
+# ggsave(filename="plots/5_4_p_t.pdf", plot=p_t, width = 6, height = 4, units = "in", device = cairo_pdf)
 p_t
 ```
 
