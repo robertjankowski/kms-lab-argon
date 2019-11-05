@@ -13,22 +13,50 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(gridExtra)
+library(scales)
+library(latex2exp)
 ```
 
 ### Testing stability
 ```{r}
 stability <- read.csv("output/stability.csv", header = F)
 colnames(stability) <- c("tau", "H", "P", "T")
-head(stability)
+# head(stability)
 ```
 
-```{r, fig.width=15, fig.height=4}
-h <- ggplot(stability) + geom_point(aes(tau, H)) + scale_x_log10() + labs(title = "Hamiltonian") + theme_light()
-p <- ggplot(stability) + geom_point(aes(tau, P)) + scale_x_log10() + labs(title = "Pressure") + theme_light()
-t <- ggplot(stability) + geom_point(aes(tau, T)) + scale_x_log10() + labs(title = "Temperature") + theme_light()
+```{r, fig.width=6, fig.height=4}
+h <- ggplot(stability) + 
+    geom_point(aes(tau, H)) + 
+    scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    # labs(title = "Hamiltonian") + 
+    labs(y = "H [kJ/mol]", x= TeX("$\\tau \\, \\[ps\\]$")) +
+    theme_light() + 
+    theme(text = element_text(size = 14))
+
+p <- ggplot(stability) + 
+    geom_point(aes(tau, P)) + 
+    scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    # labs(title = "Pressure") + 
+    labs(y = "P [x 16.6 atm.]", x=TeX("$\\tau \\, \\[ps\\]$")) +
+    theme_light() + 
+    theme(text = element_text(size = 14))
+
+t <- ggplot(stability) + 
+    geom_point(aes(tau, T)) + 
+    scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
+                  labels = trans_format("log10", math_format(10^.x))) +
+    # labs(title = "Temperature") + 
+    labs(y = "T [K]",  x = TeX("$\\tau \\, \\[ps\\]$")) +
+    theme_light() + 
+    theme(text = element_text(size = 14))
 
 # ggsave(filename = "stability.png", grid.arrange(h, p, t, nrow = 1), width = 12, height = 4)
-grid.arrange(h, p, t, nrow = 1)
+#grid.arrange(h, p, t, nrow = 1)
+# ggsave(filename="plots/5_1_stability_H.pdf", plot=h, width = 6, height = 3, units = "in")
+# ggsave(filename="plots/5_1_stability_P.pdf", plot=p, width = 6, height = 3, units = "in")
+# ggsave(filename="plots/5_1_stability_T.pdf", plot=t, width = 6, height = 3, units = "in")
 ```
 
 
@@ -50,25 +78,35 @@ colnames(tau_e3) <- c("t", "H", "V", "T", "P")
 h_compare <- ggplot(tau_e2, aes(t, H)) +
     geom_point(aes(color = "tau = 10^-2")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
-    geom_point(data = tau_e6, aes(color = "tau = 10^-6"), alpha = 0.2) +
-    labs(x = "t [ps]", y = "H [kJ/mol]", title = "Hamiltonian") +
-    theme_light()
+    geom_point(data = tau_e6, aes(color = "tau = 10^-6"), alpha = 0.08) +
+    labs(x = "t [ps]", y = "H [kJ/mol]") +
+    theme_light() + 
+    scale_color_discrete(labels = unname(TeX(c("$\\tau = 10^{-2}", "$\\tau = 10^{-3}", "$\\tau = 10^{-6}")))) + 
+    theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14))
 
 # ggsave(filename = "h_compare.png", h_compare, width = 12, height = 6)
 h_compare 
+
+# ggsave(filename="plots/5_1_tau_compare_H.pdf", plot=h_compare, width = 6, height = 4, units = "in")
 ```
 
 ### Temperature
 ```{r, fig.width=10, fig.height=5}
 t_compare <- ggplot(tau_e2, aes(t, T)) +
     geom_point(aes(color = "tau = 10^-2")) +
-    geom_point(data = tau_e6, aes(color = "tau = 10^-6")) +
+    geom_point(data = tau_e6, aes(color = "tau = 10^-6"), alpha = 0.6) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
-    labs(x = "t [ps]", y = "T [K]", title = "Temperature") +
-    theme_light()
+    labs(x = "t [ps]", y = "T [K]") +
+    theme_light() + 
+    scale_color_discrete(labels = unname(TeX(c("$\\tau = 10^{-2}", "$\\tau = 10^{-3}", "$\\tau = 10^{-6}")))) + 
+    theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14))
 
 # ggsave(filename = "t_compare.png", t_compare, width = 12, height = 6)
 t_compare
+
+# ggsave(filename="plots/5_1_tau_compare_T.pdf", plot=t_compare,  width = 6, height = 4, units = "in")
 ```
 
 ### Pressure
@@ -78,12 +116,15 @@ p_compare <- ggplot(tau_e2, aes(t, P)) +
     geom_point(data = tau_e6, aes(color = "tau = 10^-6")) +
     geom_point(data = tau_e3, aes(color = "tau = 10^-3")) +
     labs(x = "t [ps]", y = "P [x 16.6 atm.]") + # title = "Pressure"
-    theme_light() +
+    theme_light() + 
+    scale_color_discrete(labels = unname(TeX(c("$\\tau = 10^{-2}", "$\\tau = 10^{-3}", "$\\tau = 10^{-6}")))) + 
     theme(legend.position = "top", legend.title = element_blank(),
-          legend.text = element_text(size = 12))
+          legend.text = element_text(size = 13), text = element_text(size = 14))
+
 
 # ggsave(filename = "p_compare.png", p_compare, width = 12, height = 6)
 p_compare
+# ggsave(filename="plots/5_1_tau_compare_P.pdf", plot=p_compare, width = 6, height = 4, units = "in")
 ```
 
 
@@ -101,24 +142,35 @@ a_min
 
 
 ```{r}
-ggplot(a_testing) +
+a_plot <- ggplot(a_testing) +
     geom_point(aes(a, V)) +
     geom_vline(xintercept = a_min$a, color = "red") + 
-    labs(x = "a [nm]", y = "V [kJ/mol]", title = "Testing proper `a`") + 
-    theme_light()
+    labs(x = "a [nm]", y = "V [kJ/mol]") + 
+    theme_light() +
+    theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14))
+
+# ggsave(filename="plots/5_2_a_testing.pdf", plot=a_plot, width = 6, height = 4, units = "in")
+a_plot
 ```
 
 
 ```{r}
-testing_T_mean <- read.csv("output/5_2_out_tau=1e-4.csv", header = T)
+testing_T_mean <- read.csv("output/5_2_out_tau=1e-4.csv", header = F)
 colnames(testing_T_mean) <- c("t", "H", "V", "T", "P")
 ```
 
 ```{r}
-ggplot(testing_T_mean) +
-    geom_point(aes(t, T), alpha = 0.3) + 
+testing_T_mean_plot <- ggplot(testing_T_mean) +
+    geom_point(aes(t, T), alpha = 0.1) + 
     labs(x = "t [ps]", y = "T [K]") +
-    theme_light()
+    theme_light() +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14))
+
+# ggsave(filename="plots/5_2_T_mean.pdf", plot = testing_T_mean_plot, 
+       # width = 6, height = 4, units = "in")
+testing_T_mean_plot
 ```
 
 ## 5.3 Topnienie kryształu 
@@ -136,15 +188,19 @@ colnames(T0100) <- c("t", "H", "V", "T", "P")
 ```
 
 ```{r, fig.width=10, fig.height=7}
-ggplot() +
-    geom_point(data = T070, aes(t, T, color = "70K")) +
-    geom_point(data = T080, aes(t, T, color = "80K")) +
-    geom_point(data = T090, aes(t, T, color = "90K")) +
-    geom_point(data = T0100, aes(t, T, color = "100K")) +
-    labs(color = "T0") +
+melt_plot <- ggplot() +
+    geom_point(data = T070, aes(t, T, color = "70K"), size= 0.5) +
+    geom_point(data = T080, aes(t, T, color = "80K"), size= 0.5) +
+    geom_point(data = T090, aes(t, T, color = "90K"), size= 0.5) +
+    geom_point(data = T0100, aes(t, T, color = "100K"), size= 0.5) +
+    labs(x = "t [ps]", y = "T [K]", color = "T0") +
     theme_light() +
-    theme(legend.position = "top",
-          legend.text = element_text(size = 12))
+    theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
+
+# ggsave(filename="plots/5_3_T0_melt.pdf", plot=melt_plot, width = 6, height = 4, units = "in")
+melt_plot
 ```
 
 ## 5.4 Gaz
@@ -161,10 +217,17 @@ s0_min <- s0_testing[39,]
 ```
 
 ```{r}
-ggplot(s0_testing) + 
+s0_plot <- ggplot(s0_testing) + 
     geom_point(aes(S0, T)) +
-    geom_vline(xintercept = s0_min$S0, color = "blue") +
-    theme_light()
+    geom_vline(xintercept = s0_min$S0, color = "red") +
+    theme_light() +
+    ylab("T [K]") +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
+
+# ggsave(filename="plots/5_4_S0.pdf", plot=s0_plot, width = 6, height = 4, units = "in")
+s0_plot
 ```
 
 
@@ -192,7 +255,11 @@ ggplot() +
     geom_point(data = S0200, aes(t, P, color = "So=0"), alpha = 1) +
     geom_point(data = S010000, aes(t, P, color = "So=10000"), alpha = 0.1) +
     geom_point(data = S020000, aes(t, P, color = "So=19000"), alpha = 0.05) +
-    theme_light()
+    labs(x = "t [ps]", y = "P [x 16.6 atm.]") +
+    theme_light() +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
 ```
 
 
@@ -201,7 +268,10 @@ ggplot() +
     geom_point(data = S0200, aes(t, T, color = "So=0"), alpha = 1) +
     geom_point(data = S010000, aes(t, T, color = "So=10000"), alpha = 0.1) +
     geom_point(data = S020000, aes(t, T, color = "So=19000"), alpha = 0.03) +
-    theme_light()
+   theme_light() +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
 ```
 
 P(T)
@@ -228,11 +298,18 @@ ideal <- data.frame(T = T, P = P)
 ```
 
 
-```{r}
-ggplot(ideal_gas_testing) +
+```{r, warning=FALSE, message=FALSE}
+p_t <- ggplot(ideal_gas_testing) +
     geom_point(aes(T, P, color = "Symulacja")) +
     geom_line(data = ideal, aes(T, P, color = "Gaz doskonały")) +
-    theme_light()
+    labs(x = "T [K]", y = "P [x 16.6 atm.]") +
+   theme_light() +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
+
+# ggsave(filename="plots/5_4_p_t.pdf", plot=p_t, width = 6, height = 4, units = "in", device = cairo_pdf)
+p_t
 ```
 
 
@@ -249,21 +326,35 @@ colnames(T02000) <- c("t", "H", "V", "T", "P")
 ```
 
 ```{r, fig.width=12, fig.height=5}
-ggplot() + 
-    geom_line(data = T0500, aes(t, T, color = "T0=500"), alpha = 1) +
-    geom_line(data = T01000, aes(t, T, color = "T0=1000"), alpha = 1) +
-    geom_line(data = T01500, aes(t, T, color = "T0=1500"), alpha = 1) +
-    geom_line(data = T02000, aes(t, T, color = "T0=2000"), alpha = 1) +
+t0_compare <- ggplot() + 
+    geom_line(data = T0500, aes(t, T, color = "500 K"), alpha = 1) +
+    geom_line(data = T01000, aes(t, T, color = "1000 K"), alpha = 1) +
+    geom_line(data = T01500, aes(t, T, color = "1500 K"), alpha = 1) +
+    geom_line(data = T02000, aes(t, T, color = "2000 K"), alpha = 1) +
     geom_vline(xintercept = 1.9, alpha = 0.4) +
-    theme_light()
+    labs(x = "t [ps]", y = "T [K]", color = "T0") +
+   theme_light() +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
+
+# ggsave(filename="plots/5_4_t0_compare.pdf", plot=t0_compare, width = 6, height = 4, units = "in")
+t0_compare  
 ```
 
 ```{r, fig.width=12, fig.height=5}
-ggplot() + 
-    geom_line(data = T0500, aes(t, P, color = "T0=500"), alpha = 1) +
-    geom_line(data = T01000, aes(t, P, color = "T0=1000"), alpha = 1) +
-    geom_line(data = T01500, aes(t, P, color = "T0=1500"), alpha = 1) +
-    geom_line(data = T02000, aes(t, P, color = "T0=2000"), alpha = 1) +
+p_compare <- ggplot() + 
+    geom_line(data = T0500, aes(t, P, color = "500 K"), alpha = 1) +
+    geom_line(data = T01000, aes(t, P, color = "1000 K"), alpha = 1) +
+    geom_line(data = T01500, aes(t, P, color = "1500 K"), alpha = 1) +
+    geom_line(data = T02000, aes(t, P, color = "2000 K"), alpha = 1) +
     geom_vline(xintercept = 1.9, alpha = 0.4) +
-    theme_light()
+    labs(x = "t [ps]", y = "P [x 16.6 atm.]") +
+       theme_light() +
+        theme(legend.position = "top", legend.title = element_blank(),
+          legend.text = element_text(size = 13), text = element_text(size = 14)) +
+    guides(color = guide_legend(override.aes = list(size=3)))
+
+# ggsave(filename="plots/5_4_p_compare.pdf", plot=p_compare, width = 6, height = 4, units = "in")
+p_compare
 ```

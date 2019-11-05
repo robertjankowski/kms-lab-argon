@@ -24,9 +24,11 @@ import java.util.List;
 
 public class MainFrame implements GLEventListener, MouseMotionListener {
 
-    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_3_pos_T0=100.0.csv");
+    private List<AtomSphere[]> atomSpheres = loadAtoms("output/5_3_pos_T0=90.0.csv");
     private TextRenderer timeRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 36));
+    private TextRenderer parametersRenderer = new TextRenderer(new Font("SansSerif", Font.BOLD, 30));
     private final int N = 125;
+    private final double T0 = 90;
     private final double tau = 1e-2;
     private String tauFormat = "0.00";
     private double timestep = 0.0; // ps
@@ -56,6 +58,7 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 
         renderTimestep();
+        renderParameters();
         if (iteration < atomSpheres.size())
             for (AtomSphere atom : atomSpheres.get(iteration))
                 atom.draw(gl, true);
@@ -111,9 +114,17 @@ public class MainFrame implements GLEventListener, MouseMotionListener {
     private void renderTimestep() {
         timeRenderer.beginRendering(800, 800);
         timeRenderer.setColor(1.0f, 0.2f, 0.2f, 0.8f);
-        timeRenderer.draw("t = " + getRoundedTimestep(timestep, tauFormat) + "ps", 100, 100);
+        timeRenderer.draw("t = " + getRoundedTimestep(timestep, tauFormat) + "ps", 80, 80);
         timeRenderer.endRendering();
         timestep += tau;
+    }
+
+    private void renderParameters() {
+        parametersRenderer.beginRendering(800, 800);
+        parametersRenderer.setColor(0.83f, 0.93f, 0.32f, 0.8f);
+        parametersRenderer.draw("T0 = " + T0 + "K", 600, 750);
+        parametersRenderer.draw("N = " + N, 600, 700);
+        parametersRenderer.endRendering();
     }
 
     private List<AtomSphere[]> loadAtoms(String filename) {
